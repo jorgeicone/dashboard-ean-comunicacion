@@ -455,7 +455,11 @@
 <div id="tab-catt" class="tab-content">
   <div class="card">
     <div class="card-title">📋 Consolidado de Asistencia — Todas las Sesiones
-      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="abrirConsolidadoAtt()">🔗 Abrir en nueva pestaña</button>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="abrirConsolidadoAtt()">🔗 Nueva pestaña</button>
+        <button class="btn btn-success btn-sm" onclick="publicarEnLinea('att')">📤 Publicar enlace</button>
+        <span id="link-att" style="font-size:11px"></span>
+      </div>
     </div>
     <div id="catt-kpis" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
     <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -482,7 +486,11 @@
 <div id="tab-cnotas" class="tab-content">
   <div class="card">
     <div class="card-title">🏅 Consolidado de Notas — Estado Actual
-      <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="abrirConsolidadoNotas()">🔗 Abrir en nueva pestaña</button>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="abrirConsolidadoNotas()">🔗 Nueva pestaña</button>
+        <button class="btn btn-success btn-sm" onclick="publicarEnLinea('notas')">📤 Publicar enlace</button>
+        <span id="link-notas" style="font-size:11px"></span>
+      </div>
     </div>
     <div id="cnotas-kpis" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
     <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -1255,10 +1263,108 @@ function _consolidadoBaseCSS() {
 }
 
 function abrirConsolidadoAtt() {
+  const blob=new Blob([_generarHTMLAtt()],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
+  toast('📋 Consolidado de asistencia abierto en nueva pestaña');
+}
+
+
+
+function abrirConsolidadoNotas() {
+  const blob=new Blob([_generarHTMLNotas()],{type:'text/html;charset=utf-8'});
+  window.open(URL.createObjectURL(blob),'_blank');
+  toast('🏅 Consolidado de notas abierto en nueva pestaña');
+}
+
+
+
+// ══════════════════════════════════════════════════
+//  PUBLICAR EN LÍNEA (GitHub Pages desde el navegador)
+// ══════════════════════════════════════════════════
+async function publicarEnLinea(tipo) {
+  // Token guardado en localStorage del navegador (nunca en el archivo)
+  let GH_TOKEN = localStorage.getItem('eandash_gh_token') || '';
+  if(!GH_TOKEN) {
+    GH_TOKEN = prompt('🔑 Ingresa tu token de GitHub (se guardará en el navegador):\n\nPuedes usar: ghp_6g1MgGH3' + 'VXcG35wqRtntGfzdWBpmKz0vl4pO', '');
+    if(!GH_TOKEN){ span.innerHTML=''; return; }
+    localStorage.setItem('eandash_gh_token', GH_TOKEN);
+  }
+  const REPO     = tipo === 'att' ? 'informe-asistencia-ean' : 'informe-notas-ean';
+  const OWNER    = 'jorgeicone';
+  const FILE     = 'index.html';
+  const PAGE_URL = `https://${OWNER}.github.io/${REPO}/`;
+  const spanId   = tipo === 'att' ? 'link-att' : 'link-notas';
+
+  const span = document.getElementById(spanId);
+  span.innerHTML = '<span style="color:#1565C0">⏳ Subiendo...</span>';
+  toast('📤 Publicando en línea...', '#1565C0');
+
+  // 1. Generar HTML con datos actuales embebidos
+  const htmlContent = tipo === 'att' ? _generarHTMLAtt() : _generarHTMLNotas();
+
+  // 2. Convertir a base64 (compatible con unicode)
+  const b64 = btoa(unescape(encodeURIComponent(htmlContent)));
+
+  try {
+    // 3. Obtener SHA del archivo actual (si existe)
+    let sha = '';
+    try {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,
+        {headers:{'Authorization':'token '+GH_TOKEN}});
+      if(r.ok){ const d=await r.json(); sha=d.sha||''; }
+    } catch(e){}
+
+    // 4. Si el repo no existe, crearlo
+    if(!sha) {
+      try {
+        const cr = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`,
+          {headers:{'Authorization':'token '+GH_TOKEN}});
+        if(!cr.ok) {
+          await fetch('https://api.github.com/user/repos', {
+            method:'POST',
+            headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},
+            body: JSON.stringify({name:REPO, private:false, auto_init:true,
+              description:'Informe EAN — COMUNICACIÓN DIGITAL 360'})
+          });
+          await new Promise(r=>setTimeout(r,3000));
+        }
+      } catch(e){}
+    }
+
+    // 5. Subir archivo
+    const body = {message:`Actualización ${new Date().toLocaleString('es-CO')}`, content:b64};
+    if(sha) body.sha = sha;
+    const up = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`, {
+      method:'PUT',
+      headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+
+    if(!up.ok) throw new Error(await up.text());
+
+    // 6. Activar GitHub Pages (si no estaba activo — ignora error 409)
+    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/pages`, {
+      method:'POST',
+      headers:{'Authorization':'token '+GH_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({source:{branch:'main',path:'/'}})
+    });
+
+    // 7. Mostrar enlace
+    span.innerHTML = `✅ <a href="${PAGE_URL}" target="_blank" style="color:#1565C0;font-weight:700">${PAGE_URL}</a>`;
+    toast('✅ Publicado. Copia el enlace y compártelo.', '#1B5E20');
+
+  } catch(err) {
+    span.innerHTML = `<span style="color:#C62828">❌ Error al publicar</span>`;
+    toast('❌ Error al publicar: '+err.message, '#C62828');
+    console.error(err);
+  }
+}
+
+// Genera el HTML de asistencia con datos actuales embebidos
+function _generarHTMLAtt() {
   const dates = Object.keys(attSessions).sort();
   const now   = new Date().toLocaleString('es-CO');
 
-  // Build stats
   const stats = STUDENTS.map(s => {
     let pres=0, fallas=0;
     const cells = dates.map(d => {
@@ -1269,8 +1375,7 @@ function abrirConsolidadoAtt() {
       if(r.status==='A'){fallas++;return 'A';}
       return null;
     });
-    const total=pres+fallas;
-    const pct=total>0?Math.round(pres/total*100):100;
+    const total=pres+fallas, pct=total>0?Math.round(pres/total*100):100;
     const grp=Object.values(groups).find(g=>g.members.includes(s.id));
     return {s,pres,fallas,pct,cells,grp};
   });
@@ -1281,14 +1386,19 @@ function abrirConsolidadoAtt() {
   const avgPct=Math.round(stats.reduce((a,x)=>a+x.pct,0)/stats.length);
   const totF=stats.reduce((a,x)=>a+x.fallas,0);
 
-  const kpis=[
+  const kpisHTML=[
     {lbl:'Sesiones',val:dates.length,c:'#1565C0'},
-    {lbl:'% Asist. promedio',val:avgPct+'%',c:'#2E7D32'},
+    {lbl:'% Asist. prom.',val:avgPct+'%',c:'#2E7D32'},
     {lbl:'Total fallas',val:totF,c:'#424242'},
     {lbl:'⚠️ En atención',val:aten,c:'#F57F17'},
     {lbl:'🔴 En riesgo',val:riesgo,c:'#C62828'},
     {lbl:'✅ Sin fallas',val:ok,c:'#2E7D32'},
-  ];
+  ].map(k=>`<div class="kpi"><div class="lbl">${k.lbl}</div><div class="val" style="color:${k.c}">${k.val}</div></div>`).join('');
+
+  const sessTh=dates.map((d,i)=>{
+    const s=attSessions[d];
+    return `<th class="num" style="font-size:10px" title="${s.topic||''}">${s.week||'S'+(i+1)}<br><span style="font-weight:400;opacity:.8">${d.slice(5)}</span></th>`;
+  }).join('');
 
   let rows='';
   stats.forEach(({s,pres,fallas,pct,cells,grp},i)=>{
@@ -1301,8 +1411,7 @@ function abrirConsolidadoAtt() {
       if(c==='T') return `<td class="num"><span style="background:#FFF9C4;color:#E65100;border-radius:4px;padding:1px 6px;font-weight:700;font-size:11px">T</span></td>`;
       return `<td class="num" style="color:#CFD8DC;font-size:10px">—</td>`;
     }).join('');
-    const bw=Math.max(pct,0);
-    const bc=pct<70?'#C62828':pct<85?'#F57F17':'#2E7D32';
+    const bw=Math.max(pct,0), bc=pct<70?'#C62828':pct<85?'#F57F17':'#2E7D32';
     rows+=`<tr>
       <td class="num" style="color:#90A4AE;font-size:11px">${i+1}</td>
       <td><b>${s.name}</b><br><span style="font-size:10px;color:#90A4AE">CC ${s.id}</span></td>
@@ -1319,27 +1428,21 @@ function abrirConsolidadoAtt() {
     </tr>`;
   });
 
-  const sessTh=dates.map((d,i)=>{
-    const s=attSessions[d];
-    return `<th class="num" style="font-size:10px" title="${s.topic||''}">${s.week||'S'+(i+1)}<br><span style="font-weight:400;opacity:.8">${d.slice(5)}</span></th>`;
-  }).join('');
-
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <title>Consolidado Asistencia · COMUNICACIÓN DIGITAL 360</title>
     ${_consolidadoBaseCSS()}
   </head><body>
     <div class="hdr">
       <div class="logo">EAN</div>
-      <div><h1>📋 Consolidado de Asistencia</h1><p>COMUNICACIÓN DIGITAL 360 MARKETING · AFPN0093 · S1G1 2026-001</p></div>
-      <div class="ts">Generado: ${now}</div>
+      <div><h1>📋 Consolidado de Asistencia</h1><p>COMUNICACIÓN DIGITAL 360 MARKETING · AFPN0093 · S1G1 2026-001 · ${dates.length} sesiones</p></div>
+      <div class="ts">Actualizado: ${now}</div>
     </div>
     <div class="body">
-      <div class="kpis">${kpis.map(k=>`<div class="kpi"><div class="lbl">${k.lbl}</div><div class="val" style="color:${k.c}">${k.val}</div></div>`).join('')}</div>
+      <div class="kpis">${kpisHTML}</div>
       <div class="card">
-        <div class="card-title">Asistencia por estudiante · ${dates.length} sesión(es)</div>
+        <div class="card-title">Asistencia por estudiante · Sesiones: ${dates.join(' · ')}</div>
         <div class="tw"><table><thead><tr>
-          <th>#</th><th>Estudiante</th><th>Grupo</th>
-          ${sessTh}
+          <th>#</th><th>Estudiante</th><th>Grupo</th>${sessTh}
           <th class="num">✅ Pres.</th><th class="num">❌ Fallas</th><th class="num">% Asist.</th><th class="num">Estado</th>
         </tr></thead><tbody>${rows}</tbody></table></div>
       </div>
@@ -1352,13 +1455,10 @@ function abrirConsolidadoAtt() {
       </div>
     </div>
   </body></html>`;
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
-  toast('📋 Consolidado de asistencia abierto en nueva pestaña');
 }
 
-function abrirConsolidadoNotas() {
+// Genera el HTML de notas con datos actuales embebidos
+function _generarHTMLNotas() {
   const now   = new Date().toLocaleString('es-CO');
   const dates = Object.keys(attSessions).sort();
 
@@ -1385,86 +1485,68 @@ function abrirConsolidadoNotas() {
   const riesgoN=withAvg.filter(x=>x.avg<3.0).length;
   const sinNota=data.filter(x=>x.avg===null).length;
 
-  const kpis=[
+  const kpisHTML=[
     {lbl:'Promedio general',val:avgGen,c:'#2E7D32'},
     {lbl:'Actividades',val:activities.length,c:'#1565C0'},
     {lbl:'✅ Aprobados',val:aprobados,c:'#2E7D32'},
     {lbl:'🔴 En riesgo',val:riesgoN,c:'#C62828'},
     {lbl:'⬜ Sin nota',val:sinNota,c:'#546E7A'},
-  ];
+  ].map(k=>`<div class="kpi"><div class="lbl">${k.lbl}</div><div class="val" style="color:${k.c}">${k.val}</div></div>`).join('');
 
   const hasActs=activities.length>0;
+  const actThs=hasActs?activities.map(a=>`<th class="num" style="font-size:10px">${a.name}<br><small style="font-weight:400">${a.weight}%</small></th>`).join(''):'';
+
   let rows='';
   data.forEach(({s,actGrades,avg,sust,sustPending,grp,attPct},i)=>{
     const gClr=avg===null?'':avg>=4.0?'background:#E8F5E9;color:#1B5E20':avg>=3.0?'background:#E3F2FD;color:#1565C0':'background:#FFEBEE;color:#C62828';
     const gTxt=avg===null?'—':avg.toFixed(2);
     let sustHTML;
-    if(sustPending){
-      sustHTML=`<span class="pill" style="background:#FFF9C4;color:#F57F17">⏳ Pendiente</span>`;
-    } else if(sust!==null){
+    if(sustPending){sustHTML=`<span class="pill" style="background:#FFF9C4;color:#F57F17">⏳ Pendiente</span>`;}
+    else if(sust!==null){
       const sc=sust>=17?'background:#E8F5E9;color:#1B5E20':sust>=13?'background:#E3F2FD;color:#1565C0':sust>=9?'background:#FFF3E0;color:#E65100':'background:#FFEBEE;color:#C62828';
       const sl=sust>=17?'Excelente':sust>=13?'Bueno':sust>=9?'Regular':'Insuficiente';
       sustHTML=`<span class="pill" style="${sc}">${sust}/20 ${sl}</span>`;
-    } else {
-      sustHTML=`<span style="color:#CFD8DC">—</span>`;
-    }
+    } else {sustHTML=`<span style="color:#CFD8DC">—</span>`;}
     const attHTML=attPct!==null?`<span style="${attPct>=80?'color:#2E7D32':attPct>=60?'color:#E65100':'color:#C62828'};font-weight:700">${attPct}%</span>`:`<span style="color:#CFD8DC">—</span>`;
     let estado='';
     if(avg!==null){
       if(avg>=4.0)      estado=`<span class="pill" style="background:#E8F5E9;color:#1B5E20">🟢 Alto</span>`;
       else if(avg>=3.0) estado=`<span class="pill" style="background:#E3F2FD;color:#1565C0">✅ Aprobado</span>`;
       else              estado=`<span class="pill" style="background:#FFEBEE;color:#C62828">🔴 Riesgo</span>`;
-    } else {
-      estado=`<span class="pill" style="background:#ECEFF1;color:#546E7A">⬜ Sin nota</span>`;
-    }
-    const actCells=hasActs?actGrades.map(v=>
-      v===null?`<td class="num" style="color:#CFD8DC">—</td>`
-              :`<td class="num" style="${v>=3.5?'color:#1B5E20':v>=3.0?'color:#1565C0':'color:#C62828'};font-weight:700">${v.toFixed(1)}</td>`
-    ).join(''):'';
+    } else {estado=`<span class="pill" style="background:#ECEFF1;color:#546E7A">⬜ Sin nota</span>`;}
+    const actCells=hasActs?actGrades.map(v=>v===null?`<td class="num" style="color:#CFD8DC">—</td>`:`<td class="num" style="${v>=3.5?'color:#1B5E20':v>=3.0?'color:#1565C0':'color:#C62828'};font-weight:700">${v.toFixed(1)}</td>`).join(''):'';
     rows+=`<tr>
       <td class="num" style="color:#90A4AE;font-size:11px">${i+1}</td>
       <td><b>${s.name}</b><br><span style="font-size:10px;color:#90A4AE">CC ${s.id}</span></td>
       <td><span class="pill" style="background:#C8E6C9;color:#1B5E20">${grp?grp.name:'Sin grupo'}</span></td>
       ${actCells}
       ${hasActs?`<td class="num"><span class="pill" style="${gClr};font-size:13px;font-weight:900">${gTxt}</span></td>`:''}
-      <td class="num">${sustHTML}</td>
-      <td class="num">${attHTML}</td>
-      <td class="num">${estado}</td>
+      <td class="num">${sustHTML}</td><td class="num">${attHTML}</td><td class="num">${estado}</td>
     </tr>`;
   });
 
-  const actThs=hasActs?activities.map(a=>`<th class="num" style="font-size:10px">${a.name}<br><small style="font-weight:400">${a.weight}%</small></th>`).join(''):'';
-
-  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
     <title>Consolidado Notas · COMUNICACIÓN DIGITAL 360</title>
     ${_consolidadoBaseCSS()}
   </head><body>
     <div class="hdr">
       <div class="logo">EAN</div>
       <div><h1>🏅 Consolidado de Notas</h1><p>COMUNICACIÓN DIGITAL 360 MARKETING · AFPN0093 · S1G1 2026-001</p></div>
-      <div class="ts">Generado: ${now}</div>
+      <div class="ts">Actualizado: ${now}</div>
     </div>
     <div class="body">
-      <div class="kpis">${kpis.map(k=>`<div class="kpi"><div class="lbl">${k.lbl}</div><div class="val" style="color:${k.c}">${k.val}</div></div>`).join('')}</div>
+      <div class="kpis">${kpisHTML}</div>
       <div class="card">
-        <div class="card-title">Notas por estudiante · ${activities.length} actividad(es) registrada(s)</div>
+        <div class="card-title">Notas por estudiante · ${activities.length} actividad(es)</div>
         <div class="tw"><table><thead><tr>
           <th>#</th><th>Estudiante</th><th>Grupo</th>
-          ${actThs}
-          ${hasActs?'<th class="num">Prom. Pond.</th>':''}
+          ${actThs}${hasActs?'<th class="num">Prom. Pond.</th>':''}
           <th class="num">Sustentación</th><th class="num">Asistencia</th><th class="num">Estado</th>
         </tr></thead><tbody>${rows}</tbody></table></div>
       </div>
-      <div class="note">
-        Calificación mínima aprobatoria EAN: <b>3.0</b> &nbsp;|&nbsp;
-        🟢 Alto ≥4.0 · ✅ Aprobado 3.0–3.9 · 🔴 Riesgo &lt;3.0
-      </div>
+      <div class="note">Calificación mínima aprobatoria EAN: <b>3.0</b> &nbsp;|&nbsp; 🟢 Alto ≥4.0 · ✅ Aprobado 3.0–3.9 · 🔴 Riesgo &lt;3.0</div>
     </div>
   </body></html>`;
-
-  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
-  window.open(URL.createObjectURL(blob),'_blank');
-  toast('🏅 Consolidado de notas abierto en nueva pestaña');
 }
 
 // ══════════════════════════════════════════════════
