@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · COMUNICACIÓN DIGITAL 360 MARKETING · EAN</title>
+<style>
+  :root {
+    --ean-dark:    #1B5E20;
+    --ean-mid:     #2E7D32;
+    --ean-main:    #388E3C;
+    --ean-light:   #66BB6A;
+    --ean-pale:    #C8E6C9;
+    --ean-accent:  #92D050;
+    --ean-bg:      #F1F8E9;
+    --ean-white:   #FFFFFF;
+    --ean-gray:    #546E7A;
+    --ean-border:  #A5D6A7;
+    --red:         #C62828;
+    --orange:      #E65100;
+    --yellow:      #F57F17;
+    --green:       #1B5E20;
+    --radius:      8px;
+    --shadow:      0 2px 8px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--ean-bg); color: #212121; font-size: 14px; }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: linear-gradient(135deg, var(--ean-dark) 0%, var(--ean-main) 100%);
+    color: white; padding: 14px 24px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+  .header .logo { font-size: 28px; font-weight: 900; color: var(--ean-accent); letter-spacing: -1px; }
+  .header .course-info h1 { font-size: 16px; font-weight: 700; line-height: 1.2; }
+  .header .course-info p  { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+  .header .badge { margin-left: auto; background: var(--ean-accent); color: var(--ean-dark);
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+  /* ─── TABS ─── */
+  .tab-nav { display: flex; background: var(--ean-mid); overflow-x: auto; }
+  .tab-btn {
+    padding: 13px 20px; color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 600;
+    border: none; background: none; cursor: pointer; white-space: nowrap;
+    border-bottom: 3px solid transparent; transition: all .2s;
+  }
+  .tab-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+  .tab-btn.active { color: var(--ean-accent); border-bottom-color: var(--ean-accent); background: rgba(0,0,0,0.15); }
+
+  /* ─── CONTENT ─── */
+  .tab-content { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ─── CARDS ─── */
+  .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 18px; margin-bottom: 16px; border-left: 4px solid var(--ean-main); }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--ean-dark); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px; }
+
+  /* ─── FORMS ─── */
+  .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 11px; font-weight: 600; color: var(--ean-gray); text-transform: uppercase; }
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    padding: 7px 10px; border: 1px solid var(--ean-border); border-radius: 6px;
+    font-size: 13px; outline: none; transition: border .2s; font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--ean-main); box-shadow: 0 0 0 2px var(--ean-pale); }
+
+  /* ─── BUTTONS ─── */
+  .btn { padding: 7px 14px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all .2s; display: inline-flex; align-items: center; gap: 5px; }
+  .btn-primary  { background: var(--ean-main); color: white; }
+  .btn-primary:hover  { background: var(--ean-dark); }
+  .btn-success  { background: #43A047; color: white; }
+  .btn-success:hover  { background: var(--ean-dark); }
+  .btn-danger   { background: #E53935; color: white; }
+  .btn-danger:hover   { background: var(--ean-dark); }
+  .btn-outline  { background: white; color: var(--ean-main); border: 1px solid var(--ean-main); }
+  .btn-outline:hover  { background: var(--ean-pale); }
+  .btn-sm { padding: 4px 9px; font-size: 12px; }
+  .btn-xs { padding: 3px 7px; font-size: 11px; border-radius: 4px; }
+
+  /* ─── TABLE ─── */
+  .tbl-wrap { overflow-x: auto; border-radius: 6px; border: 1px solid var(--ean-border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: var(--ean-main); color: white; padding: 9px 10px; text-align: left;
+    font-size: 12px; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+  tbody tr:nth-child(even) { background: #F9FBF9; }
+  tbody tr:hover { background: var(--ean-pale); }
+  td { padding: 7px 10px; border-bottom: 1px solid #E8F5E9; vertical-align: middle; }
+  .num { text-align: center; }
+
+  /* ─── ATTENDANCE STATUS ─── */
+  .status-group { display: flex; gap: 3px; }
+  .status-btn {
+    padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc;
+    font-size: 11px; font-weight: 700; cursor: pointer; transition: all .15s; background: #f5f5f5;
+  }
+  .status-btn.P.active { background: #43A047; color: white; border-color: #2E7D32; }
+  .status-btn.T.active { background: #FB8C00; color: white; border-color: #E65100; }
+  .status-btn.A.active { background: #E53935; color: white; border-color: #B71C1C; }
+  .status-btn:not(.active):hover { background: #e0e0e0; }
+
+  /* ─── COUNTERS ─── */
+  .counter-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+  .counter { background: white; border-radius: var(--radius); padding: 12px 18px;
+    text-align: center; border: 2px solid; min-width: 100px; }
+  .counter .count { font-size: 28px; font-weight: 900; line-height: 1; }
+  .counter .label { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .counter.c-p { border-color: #43A047; color: #2E7D32; }
+  .counter.c-t { border-color: #FB8C00; color: #E65100; }
+  .counter.c-a { border-color: #E53935; color: #C62828; }
+  .counter.c-total { border-color: var(--ean-border); color: var(--ean-gray); }
+
+  /* ─── GRADE COLOR ─── */
+  .grade-cell { font-weight: 700; text-align: center; border-radius: 4px; padding: 2px 6px; }
+  .grade-g { background: #C8E6C9; color: #1B5E20; }  /* ≥ 3.5 */
+  .grade-y { background: #FFF9C4; color: #F57F17; }  /* 3.0–3.4 */
+  .grade-r { background: #FFCDD2; color: #B71C1C; }  /* < 3.0 */
+
+  /* ─── SUSTENTACIÓN ─── */
+  .criterion-row { display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border: 1px solid var(--ean-border); border-radius: 6px; margin-bottom: 8px; background: #FAFAFA; }
+  .crit-name { font-weight: 600; color: var(--ean-dark); flex: 1; }
+  .crit-desc { font-size: 11px; color: var(--ean-gray); }
+  .pts-group { display: flex; gap: 4px; }
+  .pts-btn {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--ean-border);
+    background: white; font-weight: 700; font-size: 14px; cursor: pointer; transition: all .15s;
+  }
+  .pts-btn.selected { background: var(--ean-main); color: white; border-color: var(--ean-dark); }
+  .pts-btn:hover:not(.selected) { background: var(--ean-pale); }
+  .total-display { font-size: 32px; font-weight: 900; color: var(--ean-dark); text-align: center; }
+  .label-display { font-size: 18px; font-weight: 700; text-align: center; margin-top: 4px; }
+  .label-E { color: #1B5E20; } .label-B { color: #1565C0; }
+  .label-R { color: #E65100; } .label-I { color: #C62828; }
+
+  /* ─── GROUPS ─── */
+  .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .group-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+    border-top: 4px solid var(--ean-main); overflow: hidden; }
+  .group-card-header { background: var(--ean-pale); padding: 10px 14px; display: flex;
+    justify-content: space-between; align-items: center; }
+  .group-card-header h3 { font-size: 14px; font-weight: 700; color: var(--ean-dark); }
+  .group-card-body { padding: 10px 14px; }
+  .member-item { display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: 1px solid #EEE; font-size: 12px; }
+  .member-item:last-child { border-bottom: none; }
+
+  /* ─── PROGRESS ─── */
+  .progress-wrap { background: #E0E0E0; border-radius: 20px; height: 10px; overflow: hidden; }
+  .progress-bar  { height: 100%; border-radius: 20px; transition: width .5s; }
+  .prog-g { background: linear-gradient(90deg, #43A047, #92D050); }
+  .prog-y { background: linear-gradient(90deg, #FB8C00, #FFD54F); }
+  .prog-r { background: linear-gradient(90deg, #E53935, #FF8A80); }
+
+  /* ─── SESSION LIST ─── */
+  .session-list { list-style: none; }
+  .session-item { display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border: 1px solid var(--ean-border); border-radius: 6px;
+    margin-bottom: 6px; background: white; cursor: pointer; transition: background .15s; }
+  .session-item:hover { background: var(--ean-pale); }
+  .session-item.selected { background: var(--ean-pale); border-color: var(--ean-main); font-weight: 600; }
+
+  /* ─── MISC ─── */
+  .badge-count { background: var(--ean-accent); color: var(--ean-dark); border-radius: 10px;
+    padding: 1px 7px; font-size: 11px; font-weight: 700; }
+  .obs-input { width: 100%; font-size: 12px; padding: 5px 8px; height: 36px; resize: none; }
+  .separator { border: none; border-top: 1px solid var(--ean-border); margin: 14px 0; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ean-dark);
+    color: white; padding: 10px 18px; border-radius: 8px; font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999; transition: opacity .3s; }
+  .info-chip { display: inline-block; background: var(--ean-pale); color: var(--ean-dark);
+    border-radius: 12px; padding: 3px 10px; font-size: 11px; font-weight: 600; margin: 2px; }
+  .section-label { font-size: 12px; font-weight: 700; color: var(--ean-gray);
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .empty-state { text-align: center; color: var(--ean-gray); padding: 30px; font-style: italic; }
+  .flex { display: flex; } .gap8 { gap: 8px; } .items-center { align-items: center; }
+  .mt12 { margin-top: 12px; } .mb12 { margin-bottom: 12px; }
+  .w100 { width: 100%; }
+  .summary-student-row { display: flex; flex-direction: column; gap: 5px;
+    padding: 12px; border: 1px solid var(--ean-border); border-radius: 6px;
+    background: white; margin-bottom: 8px; }
+  .summary-student-row .sname { font-weight: 700; font-size: 13px; color: var(--ean-dark); }
+  .summary-student-row .smeta { font-size: 11px; color: var(--ean-gray); margin-top: 2px; }
+  .prog-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .prog-label { font-size: 11px; font-weight: 600; color: var(--ean-gray); width: 80px; }
+  .prog-val { font-size: 11px; font-weight: 700; width: 40px; text-align: right; }
+  .input-grade { width: 55px; text-align: center; }
+  @media (max-width: 600px) {
+    .header { flex-wrap: wrap; } .badge { margin-left: 0; }
+    .form-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">EAN</div>
+  <div class="course-info">
+    <h1>COMUNICACIÓN DIGITAL 360 MARKETING</h1>
+    <p>AFPN0093 · S1G1 2026-001 · Sala N412 · Martes 14:00–16:00 · Prof. Jorge Hugo Pérez Gaona</p>
+  </div>
+  <div class="badge">36 Estudiantes</div>
+</div>
+
+<!-- TAB NAV -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('asistencia')">📅 Asistencia</button>
+  <button class="tab-btn" onclick="showTab('notas')">📝 Notas Individuales</button>
+  <button class="tab-btn" onclick="showTab('sustentacion')">🏆 Sustentación</button>
+  <button class="tab-btn" onclick="showTab('grupos')">👥 Grupos</button>
+  <button class="tab-btn" onclick="showTab('resumen')">📊 Resumen</button>
+  <button class="tab-btn" onclick="showTab('catt')">📋 Consolidado Asistencia</button>
+  <button class="tab-btn" onclick="showTab('cnotas')">🏅 Consolidado Notas</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 1 · ASISTENCIA
+═══════════════════════════════════════════════════════ -->
+<div id="tab-asistencia" class="tab-content active">
+
+  <div class="card">
+    <div class="card-title">📅 Registrar Asistencia</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha de Clase</label>
+        <input type="date" id="att-date">
+      </div>
+      <div class="form-group">
+        <label>Semana</label>
+        <input type="text" id="att-week" placeholder="Ej: Semana 3" style="width:120px">
+      </div>
+      <div class="form-group">
+        <label>Tema de clase</label>
+        <input type="text" id="att-topic" placeholder="Ej: Estrategia de contenidos" style="width:260px">
+      </div>
+      <button class="btn btn-primary" onclick="loadAttendanceSession()">📂 Cargar sesión</button>
+      <button class="btn btn-success" onclick="saveAttendance()">💾 Guardar sesión</button>
+    </div>
+
+    <!-- COUNTERS -->
+    <div class="counter-row" id="att-counters">
+      <div class="counter c-total"><div class="count" id="cnt-total">34</div><div class="label">Total</div></div>
+      <div class="counter c-p"><div class="count" id="cnt-p">0</div><div class="label">Presentes</div></div>
+      <div class="counter c-t"><div class="count" id="cnt-t">0</div><div class="label">Tardanza</div></div>
+      <div class="counter c-a"><div class="count" id="cnt-a">0</div><div class="label">Ausentes</div></div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="form-row mb12">
+      <button class="btn btn-outline btn-sm" onclick="markAll('P')">✅ Todos Presentes</button>
+      <button class="btn btn-outline btn-sm" onclick="markAll('A')">❌ Todos Ausentes</button>
+    </div>
+
+    <!-- STUDENT TABLE -->
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Estudiante</th>
+            <th>ID</th>
+            <th class="num">Estado</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody id="att-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SESSION HISTORY -->
+  <div class="card">
+    <div class="card-title">🗂 Sesiones Guardadas</div>
+    <ul class="session-list" id="session-list">
+      <li class="empty-state">Ninguna sesión guardada aún.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 2 · NOTAS INDIVIDUALES
+═══════════════════════════════════════════════════════ -->
+<div id="tab-notas" class="tab-content">
+
+  <div class="card">
+    <div class="card-title">➕ Crear / Gestionar Actividades</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre de la actividad</label>
+        <input type="text" id="act-name" placeholder="Ej: Quiz Semana 3" style="width:220px">
+      </div>
+      <div class="form-group">
+        <label>Peso (%)</label>
+        <input type="number" id="act-weight" min="0" max="100" placeholder="Ej: 20" style="width:80px">
+      </div>
+      <button class="btn btn-primary" onclick="addActivity()">➕ Agregar</button>
+    </div>
+    <div id="act-chips" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" id="grades-card">
+    <div class="card-title">📝 Registro de Notas
+      <span id="weight-total" class="info-chip" style="margin-left:8px">Peso total: 0%</span>
+    </div>
+    <div id="notas-inner">
+      <p class="empty-state">Agrega actividades para comenzar el registro de notas.</p>
+    </div>
+    <button class="btn btn-success mt12" onclick="saveGrades()">💾 Guardar Notas</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 3 · SUSTENTACIÓN
+═══════════════════════════════════════════════════════ -->
+<div id="tab-sustentacion" class="tab-content">
+
+  <div style="display:grid; grid-template-columns:1fr 320px; gap:16px; align-items:start">
+    <div>
+      <div class="card">
+        <div class="card-title">🏆 Calificación de Sustentación</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Seleccionar Grupo</label>
+            <select id="sust-group-sel" onchange="loadSustGroup()" style="width:200px">
+              <option value="">-- Selecciona grupo --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="sust-date">
+          </div>
+        </div>
+
+        <div id="sust-criteria-container"></div>
+
+        <div class="form-group mt12">
+          <label>Observaciones generales</label>
+          <textarea id="sust-obs" class="obs-input w100" style="height:60px" placeholder="Comentarios sobre la sustentación del grupo..."></textarea>
+        </div>
+        <button class="btn btn-success mt12" onclick="saveSustentacion()">💾 Guardar Calificación</button>
+      </div>
+
+      <!-- HISTORIAL SUSTENTACIONES -->
+      <div class="card">
+        <div class="card-title">📋 Historial de Calificaciones</div>
+        <div id="sust-history"><p class="empty-state">Sin registros aún.</p></div>
+      </div>
+    </div>
+
+    <!-- TOTAL DISPLAY -->
+    <div>
+      <div class="card" style="text-align:center">
+        <div class="card-title" style="justify-content:center">Resultado</div>
+        <div class="total-display" id="sust-total">0</div>
+        <div style="font-size:12px; color:var(--ean-gray); margin-top:2px">sobre 20 puntos</div>
+        <div class="label-display" id="sust-label">—</div>
+        <hr class="separator">
+        <div style="font-size:12px; color:var(--ean-gray)">
+          <div>✅ Excelente: 17–20</div>
+          <div>🔵 Bueno: 13–16</div>
+          <div>🟡 Regular: 9–12</div>
+          <div>🔴 Insuficiente: 0–8</div>
+        </div>
+      </div>
+
+      <!-- CONFIGURAR CRITERIOS -->
+      <div class="card">
+        <div class="card-title">⚙️ Configurar Criterios</div>
+        <div id="crit-config-list"></div>
+        <div class="form-row mt12">
+          <div class="form-group">
+            <label>Nombre del criterio</label>
+            <input type="text" id="new-crit-name" placeholder="Ej: Dominio del tema" style="width:180px">
+          </div>
+          <div class="form-group">
+            <label>Pts max (1–5)</label>
+            <input type="number" id="new-crit-max" min="1" max="5" value="4" style="width:70px">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addCriterion()">➕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 4 · GRUPOS
+═══════════════════════════════════════════════════════ -->
+<div id="tab-grupos" class="tab-content">
+
+  <div class="card">
+    <div class="card-title">➕ Crear / Editar Grupos</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre del grupo</label>
+        <input type="text" id="grp-name" placeholder="Ej: Grupo 1 - Alpha" style="width:220px">
+      </div>
+      <button class="btn btn-primary" onclick="createGroup()">➕ Crear Grupo</button>
+      <button class="btn btn-outline" onclick="autoCreateGroups()">🔀 Auto-crear grupos</button>
+    </div>
+
+    <div class="form-row" id="grp-assign-row" style="display:none; border-top:1px solid var(--ean-border); padding-top:12px; margin-top:4px">
+      <div class="form-group">
+        <label>Asignar estudiante a:</label>
+        <select id="grp-target-sel" style="width:200px"></select>
+      </div>
+      <div class="form-group">
+        <label>Estudiante</label>
+        <select id="grp-student-sel" style="width:260px"></select>
+      </div>
+      <button class="btn btn-success btn-sm" onclick="assignStudent()">Asignar</button>
+    </div>
+  </div>
+
+  <div class="groups-grid" id="groups-grid">
+    <p class="empty-state" style="grid-column:1/-1">No hay grupos creados. ¡Crea el primero!</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     TAB 5 · RESUMEN
+═══════════════════════════════════════════════════════ -->
+<div id="tab-resumen" class="tab-content">
+
+  <div class="card">
+    <div class="card-title">📊 Resumen General del Curso</div>
+    <div id="resumen-stats" class="counter-row"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Resumen por Estudiante</div>
+    <div class="form-row mb12">
+      <input type="text" id="search-student" placeholder="🔍 Buscar estudiante..." oninput="renderResumen()" style="width:250px">
+    </div>
+    <div id="resumen-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📤 Exportar Datos</div>
+    <div class="form-row">
+      <button class="btn btn-primary" onclick="exportCSV()">📄 Exportar CSV</button>
+      <button class="btn btn-outline" onclick="exportJSON()">📋 Exportar JSON</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAllData()" style="margin-left:auto">🗑 Limpiar todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TAB 6 · CONSOLIDADO ASISTENCIA ═══ -->
+<div id="tab-catt" class="tab-content">
+  <div class="card">
+    <div class="card-title">📋 Consolidado de Asistencia — Todas las Sesiones</div>
+    <div id="catt-kpis" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="catt-search" placeholder="🔍 Buscar estudiante..." oninput="renderConsolidadoAtt()" style="width:220px;padding:6px 10px;border:1px solid var(--ean-border);border-radius:6px;font-size:12px">
+      <select id="catt-filter" onchange="renderConsolidadoAtt()" style="padding:6px 10px;border:1px solid var(--ean-border);border-radius:6px;font-size:12px">
+        <option value="">Todos</option>
+        <option value="ok">✅ Sin fallas</option>
+        <option value="aten">⚠️ 1-2 fallas</option>
+        <option value="riesgo">🔴 3+ fallas</option>
+      </select>
+      <span id="catt-count" style="font-size:11px;color:var(--ean-gray);margin-left:auto"></span>
+    </div>
+    <div id="catt-table" class="tbl-wrap"></div>
+  </div>
+  <div style="font-size:11px;color:var(--ean-gray);padding:6px 2px">
+    💡 Este consolidado se actualiza automáticamente cada vez que guardas una sesión de asistencia.
+    &nbsp;|&nbsp; <span style="background:#C8E6C9;color:#1B5E20;padding:1px 6px;border-radius:4px;font-weight:700">P</span> Presente
+    &nbsp;<span style="background:#FFCDD2;color:#B71C1C;padding:1px 6px;border-radius:4px;font-weight:700">A</span> Ausente
+    &nbsp;<span style="background:#FFF9C4;color:#E65100;padding:1px 6px;border-radius:4px;font-weight:700">T</span> Tardanza
+  </div>
+</div>
+
+<!-- ═══ TAB 7 · CONSOLIDADO NOTAS ═══ -->
+<div id="tab-cnotas" class="tab-content">
+  <div class="card">
+    <div class="card-title">🏅 Consolidado de Notas — Estado Actual</div>
+    <div id="cnotas-kpis" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px"></div>
+    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="cnotas-search" placeholder="🔍 Buscar estudiante..." oninput="renderConsolidadoNotas()" style="width:220px;padding:6px 10px;border:1px solid var(--ean-border);border-radius:6px;font-size:12px">
+      <select id="cnotas-filter" onchange="renderConsolidadoNotas()" style="padding:6px 10px;border:1px solid var(--ean-border);border-radius:6px;font-size:12px">
+        <option value="">Todos</option>
+        <option value="alto">🟢 Alto (≥4.0)</option>
+        <option value="ok">✅ Aprobado (3.0–3.9)</option>
+        <option value="riesgo">🔴 En riesgo (&lt;3.0)</option>
+        <option value="sin">⬜ Sin nota</option>
+      </select>
+      <span id="cnotas-count" style="font-size:11px;color:var(--ean-gray);margin-left:auto"></span>
+    </div>
+    <div id="cnotas-table" class="tbl-wrap"></div>
+  </div>
+  <div style="font-size:11px;color:var(--ean-gray);padding:6px 2px">
+    💡 Este consolidado se actualiza automáticamente al guardar notas o sustentaciones.
+    &nbsp;|&nbsp; Calificación mínima aprobatoria EAN: <b>3.0</b>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  DATOS BASE
+// ══════════════════════════════════════════════════
+const STUDENTS = [
+  {id:"1000077541",  name:"Tinoco Ruiz Sofía"},
+  {id:"1000350624",  name:"Rondón Leguizamo Guillermo Andrés"},
+  {id:"1011100245",  name:"Villa Fajardo Zarith Juliana"},
+  {id:"1013106028",  name:"Muriel Salgado Juan Sebastián"},
+  {id:"1013256390",  name:"Cifuentes Martínez Camila Alejandra"},
+  {id:"1013263957",  name:"Garzón Moya Juan Jerónimo"},
+  {id:"1014861582",  name:"Mahecha Lázaro Sebastián"},
+  {id:"1014997827",  name:"Hernández Muñoz María José"},
+  {id:"1016596401",  name:"Lozano Álvarez Yesenia Sophia"},
+  {id:"1016951985",  name:"Pérez Cortés María José"},
+  {id:"1019764949",  name:"Norato Burgos Valerie"},
+  {id:"1019843108",  name:"Romero Rojas Juliana Sofía"},
+  {id:"1021397707",  name:"Martínez Martínez Laura Juliana"},
+  {id:"1021675662",  name:"Riaño Pachón Laura Andrea"},
+  {id:"1023369961",  name:"Rodríguez Salcedo Karol Valentina"},
+  {id:"1023375110",  name:"Segura Rojas Ninny Carolina"},
+  {id:"1023891376",  name:"Trujillo Ríos Andrea Catalina"},
+  {id:"1027151839",  name:"Acevedo Caro Juan Diego"},
+  {id:"1028663002",  name:"Galvis Triana Michel Fernanda"},
+  {id:"1028863347",  name:"Aragón Calderón Verónica Ester"},
+  {id:"1029143351",  name:"Castillo Vargas Karen Stefanny"},
+  {id:"1029144591",  name:"Fernández Rueda Laura Natalia"},
+  {id:"1029660441",  name:"Chica Vega Sara Alejandra"},
+  {id:"1030557501",  name:"Aunta Munar Danna Valentina"},
+  {id:"1031541266",  name:"Camacho Rico Juan Esteban"},
+  {id:"1031805029",  name:"Ángel Rojas Nashua Silvana"},
+  {id:"1032877570",  name:"Vila Peña Laura Sofía"},
+  {id:"1033102053",  name:"Dávila González Sara Lucía"},
+  {id:"1033102176",  name:"Lopera Cristiano Valentina"},
+  {id:"1033710696",  name:"Brand Mendieta Gabriela"},
+  {id:"1034577536",  name:"Díaz Moreno Juliana"},
+  {id:"1040874338",  name:"Urrea Ramírez Mariana"},
+  {id:"1070007994",  name:"Canastero Venegas Isabel Sofía"},
+  {id:"1141317881",  name:"Laverde Vargas Sara Valentina"},
+  {id:"1013108778",  name:"Castelblanco Moreno Paula Alejandra"},
+  {id:"1127242102",  name:"Niño Díaz Lucas Eduardo"}
+];
+
+const DEFAULT_CRITERIA = [
+  {name:"Perfil del Negocio",      desc:"Nombre, Actividad, UVP, Producto y Diferenciación claramente definidos.", max:4},
+  {name:"Avatar / Buyer Persona",  desc:"Va más allá de demografía: intereses, miedos, comportamiento digital y 3 pain points.", max:4},
+  {name:"Ecosistema Digital",      desc:"3 canales justificados (Canal + Hábito del Avatar + cómo amplifica la UVP).", max:4},
+  {name:"Customer Journey",        desc:"Canales mapeados en Descubrimiento, Consideración y Decisión/Conversión.", max:4},
+  {name:"Objetivo SMART",          desc:"1 objetivo Específico, Medible, Alcanzable, Relevante y Temporal. No vago.", max:4}
+];
+
+// Grupos con integrantes asignados
+const DEFAULT_GROUPS = {
+  "g_01": {id:"g_01", name:"Yoga Serena",   members:["1016596401","1029143351","1031541266","1029660441","1019764949"]},
+  // Sophia Lozano · Karen Castillo · Juan Esteban Camacho · Alejandra Chica · Valerie Norato
+  "g_02": {id:"g_02", name:"Renacer Vital", members:["1031805029","1021397707","1028663002","1141317881","1023369961"]},
+  // Silvana Ángel · Laura Juliana Martínez · Michel Fernanda Galvis · Sara Valentina Laverde · Valentina Rodríguez
+  "g_03": {id:"g_03", name:"Aura Studio",   members:["1033710696","1023891376","1014997827","1029144591","1021675662"]},
+  // Gabriela Brand · Catalina Trujillo · María José Hernández · Natalia Fernández · Andrea Riaño
+  "g_04": {id:"g_04", name:"Canta y Come",  members:["1000077541","1016951985","1011100245","1000350624","1040874338","1013108778"]},
+  // Sofía Tinoco · María José Pérez · Juliana Villa · Guillermo Rondón · Mariana Urrea · Paula Castelblanco
+  "g_05": {id:"g_05", name:"Axis",          members:["1013106028","1032877570","1014861582","1027151839","1127242102"]},
+  // Juan Muriel · Sofía Vila · Sebastián Mahecha · Juan Diego Acevedo · Lucas Niño (⏳ pendiente sustentación)
+  "g_06": {id:"g_06", name:"Nara Nails",    members:["1023375110","1070007994","1013256390","1019843108"]},
+  // Ninny Segura · Sofía Canastero · Camila Cifuentes · Juliana Romero
+  "g_07": {id:"g_07", name:"Armonía Lashes", members:["1028863347","1030557501","1033102176","1013263957","1034577536"]}
+  // Verónica Aragón · Danna Valentina Munar · Valentina Lopera · Jerónimo Garzón · Juliana Díaz (⏳ sin nota)
+};
+
+// Calificaciones de sustentación ya registradas (Semana 1 – Primera entrega)
+const DEFAULT_SUST = {
+  "g_01": {gid:"g_01", groupName:"Yoga Serena",   pts:{0:4,1:4,2:4,3:4,4:2}, total:18, label:"Excelente 🌟", obs:"LIDER: JUAN CAMACHO",    date:""},
+  "g_02": {gid:"g_02", groupName:"Renacer Vital", pts:{0:4,1:4,2:4,3:4,4:4}, total:20, label:"Excelente 🌟", obs:"",                       date:""},
+  "g_03": {gid:"g_03", groupName:"Aura Studio",   pts:{0:3,1:4,2:4,3:4,4:4}, total:19, label:"Excelente 🌟", obs:"LIDER: ANDREA RIAÑO",   date:""},
+  "g_04": {gid:"g_04", groupName:"Canta y Come",  pts:{0:4,1:4,2:4,3:3,4:2}, total:17, label:"Bueno 👍",     obs:"LIDER: Paula Castelblanco", date:""},
+  "g_05": {gid:"g_05", groupName:"Axis",          pts:{0:4,1:4,2:4,3:4,4:3}, total:19, label:"Excelente 🌟", obs:"LIDER: JUAN MURIEL | ⚠️ Lucas Niño Díaz: PENDIENTE (no sustentó, sin incapacidad)", date:""},
+  "g_06": {gid:"g_06", groupName:"Nara Nails",    pts:{0:4,1:3,2:2,3:2,4:0}, total:11, label:"Regular ⚠️",   obs:"LIDER: CAMILA",         date:""},
+  "g_07": {gid:"g_07", groupName:"Armonía Lashes", pts:{0:4,1:4,2:2,3:1,4:1}, total:12, label:"Regular ⚠️",   obs:"LIDER: JERONIMO GARZON | ⚠️ Juliana Díaz Moreno: SIN NOTA (no se presentó, sin justificación)", date:""}
+};
+
+// Estudiantes con sustentación pendiente/excluida individualmente
+const SUST_EXCLUIDOS = ["1127242102", "1034577536"];
+// 1127242102 = Lucas Niño Díaz (G-05, no sustentó)
+// 1034577536 = Juliana Díaz Moreno (G-07, no se presentó)
+
+// ══════════════════════════════════════════════════
+//  STORAGE HELPERS
+// ══════════════════════════════════════════════════
+const LS = key => { try { return JSON.parse(localStorage.getItem('eandash_'+key))||null; } catch{return null;} };
+const SS = (key,val) => localStorage.setItem('eandash_'+key, JSON.stringify(val));
+
+// ══════════════════════════════════════════════════
+//  ASISTENCIA POR DEFECTO — 10 marzo 2026 (Semana 1)
+// ══════════════════════════════════════════════════
+// A = Ausente  |  P = Presente  |  T = Tardanza
+// Ausentes confirmados: Lucas Niño Díaz (1127242102) · Juliana Díaz Moreno (1034577536)
+const _mkP = obs => ({status:'P', obs: obs||''});
+const _mkA = obs => ({status:'A', obs: obs||''});
+const DEFAULT_ATT_SESSIONS = {
+  "2026-03-10": {
+    date:"2026-03-10", week:"Semana 1",
+    topic:"Primera entrega — Sustentación Diagnóstica",
+    records: {
+      "1000077541": _mkP(),
+      "1000350624": _mkP(),
+      "1011100245": _mkP(),
+      "1013106028": _mkP(),
+      "1013256390": _mkA("Falla — ausente sin justificación"),
+      "1013263957": _mkP(),
+      "1014861582": _mkP(),
+      "1014997827": _mkP(),
+      "1016596401": _mkP(),
+      "1016951985": _mkP(),
+      "1019764949": _mkA("Falla — ausente sin justificación"),
+      "1019843108": _mkA("Falla — ausente sin justificación"),
+      "1021397707": _mkP(),
+      "1021675662": _mkP(),
+      "1023369961": _mkP(),
+      "1023375110": _mkP(),
+      "1023891376": _mkP(),
+      "1027151839": _mkP(),
+      "1028663002": _mkP(),
+      "1028863347": _mkP(),
+      "1029143351": _mkP(),
+      "1029144591": _mkP(),
+      "1029660441": _mkA("Falla — ausente sin justificación"),
+      "1030557501": _mkP(),
+      "1031541266": _mkP(),
+      "1031805029": _mkP(),
+      "1032877570": _mkP(),
+      "1033102053": _mkA("Falla — ausente sin justificación"),
+      "1033102176": _mkP(),
+      "1033710696": _mkP(),
+      "1034577536": _mkA("No se presentó a la sustentación — sin justificación"),
+      "1040874338": _mkA("Falla — ausente sin justificación"),
+      "1070007994": _mkP(),
+      "1141317881": _mkP(),
+      "1013108778": _mkP(),
+      "1127242102": _mkA("Falla — no asistió a clase ni a sustentación, sin incapacidad")
+    }
+  }
+};
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let attSessions   = LS('att_sessions')   || DEFAULT_ATT_SESSIONS;
+let activities    = LS('activities')     || [];
+let grades        = LS('grades')         || {};
+let groups        = LS('groups')         || DEFAULT_GROUPS;
+let sustRecords   = LS('sust_records')   || DEFAULT_SUST;
+let criteria      = LS('criteria')       || DEFAULT_CRITERIA;
+let currentAtt    = {};
+
+// ══════════════════════════════════════════════════
+//  TAB NAVIGATION
+// ══════════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='notas')        renderGradesTable();
+  if(id==='sustentacion') renderSustentacion();
+  if(id==='grupos')       renderGroups();
+  if(id==='resumen')      renderResumen();
+  if(id==='catt')         renderConsolidadoAtt();
+  if(id==='cnotas')       renderConsolidadoNotas();
+}
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+function toast(msg, color='#1B5E20') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.background = color; t.style.opacity = '1';
+  setTimeout(()=>t.style.opacity='0', 2500);
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 1 · ASISTENCIA
+// ══════════════════════════════════════════════════
+function initAttDate() {
+  const d = new Date(); const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('att-date').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function buildAttTable() {
+  const tbody = document.getElementById('att-tbody');
+  tbody.innerHTML = '';
+  STUDENTS.forEach((s,i)=>{
+    const saved = currentAtt[s.id] || {status:'', obs:''};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="num">${i+1}</td>
+      <td><b>${s.name}</b></td>
+      <td style="color:var(--ean-gray);font-size:11px">${s.id}</td>
+      <td class="num">
+        <div class="status-group">
+          <button class="status-btn P ${saved.status==='P'?'active':''}" onclick="setStatus('${s.id}','P',this)">P</button>
+          <button class="status-btn T ${saved.status==='T'?'active':''}" onclick="setStatus('${s.id}','T',this)">T</button>
+          <button class="status-btn A ${saved.status==='A'?'active':''}" onclick="setStatus('${s.id}','A',this)">A</button>
+        </div>
+      </td>
+      <td><input type="text" class="obs-input" placeholder="Observación..." value="${saved.obs||''}"
+          onchange="setObs('${s.id}',this.value)" style="width:200px"></td>`;
+    tbody.appendChild(tr);
+  });
+  updateCounters();
+}
+
+function setStatus(sid, status, btn) {
+  const row = btn.closest('tr');
+  row.querySelectorAll('.status-btn').forEach(b=>{b.classList.remove('active');});
+  btn.classList.add('active');
+  if(!currentAtt[sid]) currentAtt[sid]={status:'',obs:''};
+  currentAtt[sid].status = status;
+  updateCounters();
+}
+function setObs(sid,val) {
+  if(!currentAtt[sid]) currentAtt[sid]={status:'',obs:''};
+  currentAtt[sid].obs=val;
+}
+function markAll(status) {
+  STUDENTS.forEach(s=>{
+    if(!currentAtt[s.id]) currentAtt[s.id]={status:'',obs:''};
+    currentAtt[s.id].status=status;
+  });
+  buildAttTable();
+}
+function updateCounters() {
+  let p=0,t=0,a=0;
+  STUDENTS.forEach(s=>{ const st=(currentAtt[s.id]||{}).status; if(st==='P')p++; else if(st==='T')t++; else if(st==='A')a++; });
+  document.getElementById('cnt-p').textContent=p;
+  document.getElementById('cnt-t').textContent=t;
+  document.getElementById('cnt-a').textContent=a;
+  document.getElementById('cnt-total').textContent = STUDENTS.length;
+}
+
+function saveAttendance() {
+  const date  = document.getElementById('att-date').value;
+  const week  = document.getElementById('att-week').value;
+  const topic = document.getElementById('att-topic').value;
+  if(!date){ toast('Selecciona una fecha','#C62828'); return; }
+  attSessions[date] = { date, week, topic, records: JSON.parse(JSON.stringify(currentAtt)) };
+  SS('att_sessions', attSessions);
+  renderSessionList();
+  toast(`✅ Sesión ${date} guardada`);
+  // Auto-refresh consolidados si están visibles
+  if(document.getElementById('tab-catt').classList.contains('active'))   renderConsolidadoAtt();
+  if(document.getElementById('tab-cnotas').classList.contains('active')) renderConsolidadoNotas();
+}
+
+function loadAttendanceSession() {
+  const date = document.getElementById('att-date').value;
+  if(attSessions[date]) {
+    const s = attSessions[date];
+    currentAtt = JSON.parse(JSON.stringify(s.records));
+    document.getElementById('att-week').value  = s.week||'';
+    document.getElementById('att-topic').value = s.topic||'';
+    buildAttTable();
+    toast(`📂 Sesión ${date} cargada`);
+  } else {
+    currentAtt = {};
+    buildAttTable();
+    toast('Nueva sesión iniciada','#1565C0');
+  }
+}
+
+function renderSessionList() {
+  const ul = document.getElementById('session-list');
+  const keys = Object.keys(attSessions).sort().reverse();
+  if(!keys.length){ ul.innerHTML='<li class="empty-state">Ninguna sesión guardada aún.</li>'; return; }
+  ul.innerHTML = keys.map(k=>{
+    const s=attSessions[k];
+    const p=Object.values(s.records).filter(r=>r.status==='P').length;
+    const t=Object.values(s.records).filter(r=>r.status==='T').length;
+    const a=Object.values(s.records).filter(r=>r.status==='A').length;
+    return `<li class="session-item" onclick="loadSessionFromList('${k}')">
+      <span><b>${k}</b>${s.week?' · '+s.week:''} ${s.topic?' — '+s.topic:''}</span>
+      <span style="gap:6px;display:flex">
+        <span class="info-chip" style="background:#C8E6C9;color:#1B5E20">P:${p}</span>
+        <span class="info-chip" style="background:#FFF9C4;color:#E65100">T:${t}</span>
+        <span class="info-chip" style="background:#FFCDD2;color:#B71C1C">A:${a}</span>
+        <button class="btn btn-danger btn-xs" onclick="deleteSession(event,'${k}')">🗑</button>
+      </span>
+    </li>`;
+  }).join('');
+}
+
+function loadSessionFromList(date) {
+  document.getElementById('att-date').value = date;
+  loadAttendanceSession();
+}
+function deleteSession(e, date) {
+  e.stopPropagation();
+  if(!confirm(`¿Eliminar sesión del ${date}?`)) return;
+  delete attSessions[date]; SS('att_sessions',attSessions); renderSessionList();
+  toast('Sesión eliminada','#E65100');
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 2 · NOTAS INDIVIDUALES
+// ══════════════════════════════════════════════════
+function addActivity() {
+  const name   = document.getElementById('act-name').value.trim();
+  const weight = parseFloat(document.getElementById('act-weight').value)||0;
+  if(!name){ toast('Escribe el nombre de la actividad','#C62828'); return; }
+  const totalW = activities.reduce((s,a)=>s+a.weight,0);
+  if(totalW+weight>100){ toast(`El peso total supera 100%. Disponible: ${100-totalW}%`,'#C62828'); return; }
+  activities.push({id: Date.now().toString(), name, weight});
+  SS('activities',activities);
+  document.getElementById('act-name').value='';
+  document.getElementById('act-weight').value='';
+  renderGradesTable();
+  toast(`✅ Actividad "${name}" (${weight}%) agregada`);
+}
+
+function deleteActivity(aid) {
+  if(!confirm('¿Eliminar esta actividad y sus notas?')) return;
+  activities = activities.filter(a=>a.id!==aid);
+  delete grades[aid];
+  SS('activities',activities); SS('grades',grades);
+  renderGradesTable();
+  toast('Actividad eliminada','#E65100');
+}
+
+function renderGradesTable() {
+  // Activity chips
+  const chips = document.getElementById('act-chips');
+  chips.innerHTML = activities.map(a=>
+    `<span class="info-chip">${a.name} <b>${a.weight}%</b>
+      <button onclick="deleteActivity('${a.id}')" style="border:none;background:none;cursor:pointer;color:#C62828;font-size:13px;margin-left:3px">×</button>
+    </span>`
+  ).join('');
+  const totalW = activities.reduce((s,a)=>s+a.weight,0);
+  document.getElementById('weight-total').textContent = `Peso total: ${totalW}%`;
+
+  const inner = document.getElementById('notas-inner');
+  if(!activities.length){ inner.innerHTML='<p class="empty-state">Agrega actividades para comenzar.</p>'; return; }
+
+  let html = `<div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>Estudiante</th>`;
+  activities.forEach(a=> html+=`<th class="num">${a.name}<br><small>${a.weight}%</small></th>`);
+  html += `<th class="num">Promedio Pond.</th></tr></thead><tbody>`;
+
+  STUDENTS.forEach((s,i)=>{
+    html += `<tr><td class="num">${i+1}</td><td><b>${s.name}</b></td>`;
+    let wpSum=0, wSum=0;
+    activities.forEach(a=>{
+      const val = (grades[a.id]||{})[s.id]||'';
+      const numVal = parseFloat(val);
+      if(!isNaN(numVal)){ wpSum+=numVal*a.weight; wSum+=a.weight; }
+      html+=`<td class="num"><input type="number" class="input-grade" min="0" max="5" step="0.1"
+        value="${val}" placeholder="—"
+        onchange="setGrade('${a.id}','${s.id}',this.value)"
+        onfocus="this.select()"></td>`;
+    });
+    const avg = wSum>0 ? (wpSum/wSum).toFixed(2) : '—';
+    const cls = wSum>0 ? (parseFloat(avg)>=3.5?'grade-g':parseFloat(avg)>=3.0?'grade-y':'grade-r') : '';
+    html += `<td class="num"><span class="grade-cell ${cls}">${avg}</span></td></tr>`;
+  });
+  html += `</tbody></table></div>`;
+  inner.innerHTML = html;
+}
+
+function setGrade(aid, sid, val) {
+  if(!grades[aid]) grades[aid]={};
+  grades[aid][sid] = val;
+}
+
+function saveGrades() {
+  SS('grades',grades); SS('activities',activities);
+  toast('✅ Notas guardadas');
+  if(document.getElementById('tab-cnotas').classList.contains('active')) renderConsolidadoNotas();
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 3 · SUSTENTACIÓN
+// ══════════════════════════════════════════════════
+let sustPts = {};
+
+function renderSustentacion() {
+  renderSustGroupSel();
+  renderCritConfig();
+  renderSustHistory();
+}
+
+function renderSustGroupSel() {
+  const sel = document.getElementById('sust-group-sel');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- Selecciona grupo --</option>';
+  Object.keys(groups).forEach(gid=>{
+    sel.innerHTML += `<option value="${gid}" ${cur===gid?'selected':''}>${groups[gid].name}</option>`;
+  });
+}
+
+function loadSustGroup() {
+  const gid = document.getElementById('sust-group-sel').value;
+  if(gid && sustRecords[gid]) {
+    sustPts = JSON.parse(JSON.stringify(sustRecords[gid].pts||{}));
+    document.getElementById('sust-obs').value = sustRecords[gid].obs||'';
+    document.getElementById('sust-date').value = sustRecords[gid].date||'';
+  } else {
+    sustPts = {};
+    document.getElementById('sust-obs').value='';
+  }
+  renderCriteria();
+  updateSustTotal();
+}
+
+function renderCriteria() {
+  const con = document.getElementById('sust-criteria-container');
+  if(!criteria.length){ con.innerHTML='<p class="empty-state">Sin criterios configurados.</p>'; return; }
+  con.innerHTML = criteria.map((c,i)=>{
+    const pts = sustPts[i]||0;
+    const btns = Array.from({length:c.max+1},(_,v)=>
+      `<button class="pts-btn ${pts===v?'selected':''}" onclick="setPts(${i},${v},this)">${v}</button>`
+    ).join('');
+    return `<div class="criterion-row">
+      <div>
+        <div class="crit-name">${c.name}</div>
+        <div class="crit-desc">${c.desc||('0 – '+c.max+' puntos')}</div>
+      </div>
+      <div class="pts-group" id="pts-group-${i}">${btns}</div>
+    </div>`;
+  }).join('');
+}
+
+function setPts(idx, val, btn) {
+  sustPts[idx] = val;
+  const grp = document.getElementById('pts-group-'+idx);
+  grp.querySelectorAll('.pts-btn').forEach((b,v)=>b.classList.toggle('selected', v===val));
+  updateSustTotal();
+}
+
+function updateSustTotal() {
+  const total = criteria.reduce((s,_,i)=>s+(sustPts[i]||0),0);
+  const maxPts = criteria.reduce((s,c)=>s+c.max,0);
+  const scaled = maxPts ? Math.round(total/maxPts*20) : 0;
+  document.getElementById('sust-total').textContent = scaled;
+  let lbl='', cls='';
+  if(scaled>=17){lbl='Excelente 🌟'; cls='label-E';}
+  else if(scaled>=13){lbl='Bueno 👍'; cls='label-B';}
+  else if(scaled>=9){lbl='Regular ⚠️'; cls='label-R';}
+  else {lbl='Insuficiente ❌'; cls='label-I';}
+  const el = document.getElementById('sust-label');
+  el.textContent=lbl; el.className='label-display '+cls;
+}
+
+function saveSustentacion() {
+  const gid = document.getElementById('sust-group-sel').value;
+  if(!gid){ toast('Selecciona un grupo','#C62828'); return; }
+  const total = parseInt(document.getElementById('sust-total').textContent)||0;
+  sustRecords[gid] = {
+    gid, groupName: groups[gid]?groups[gid].name:gid,
+    pts: JSON.parse(JSON.stringify(sustPts)),
+    total, obs: document.getElementById('sust-obs').value,
+    date: document.getElementById('sust-date').value,
+    label: document.getElementById('sust-label').textContent
+  };
+  SS('sust_records',sustRecords);
+  renderSustHistory();
+  toast(`✅ Sustentación "${groups[gid]?groups[gid].name:gid}" guardada`);
+}
+
+function renderSustHistory() {
+  const con = document.getElementById('sust-history');
+  const recs = Object.values(sustRecords);
+  if(!recs.length){ con.innerHTML='<p class="empty-state">Sin registros aún.</p>'; return; }
+  con.innerHTML = recs.map(r=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      padding:9px 12px;border:1px solid var(--ean-border);border-radius:6px;margin-bottom:6px;background:#FAFAFA">
+      <div>
+        <b>${r.groupName}</b><span style="margin-left:8px;font-size:11px;color:var(--ean-gray)">${r.date||''}</span>
+        <div style="font-size:12px;color:var(--ean-gray);margin-top:2px">${r.obs||''}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:24px;font-weight:900;color:var(--ean-dark)">${r.total}</div>
+        <div style="font-size:11px;color:var(--ean-gray)">${r.label}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ─── CRITERIA CONFIG ───
+function renderCritConfig() {
+  const con = document.getElementById('crit-config-list');
+  con.innerHTML = criteria.map((c,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      padding:6px 8px;border:1px solid var(--ean-border);border-radius:5px;margin-bottom:5px;background:white">
+      <span style="font-size:13px">${c.name} <span class="info-chip">${c.max} pts</span></span>
+      <button class="btn btn-danger btn-xs" onclick="deleteCriterion(${i})">✕</button>
+    </div>`).join('') || '<p class="empty-state">Sin criterios.</p>';
+}
+
+function addCriterion() {
+  const name = document.getElementById('new-crit-name').value.trim();
+  const max  = parseInt(document.getElementById('new-crit-max').value)||4;
+  if(!name){ toast('Escribe el nombre del criterio','#C62828'); return; }
+  criteria.push({name,max});
+  SS('criteria',criteria);
+  document.getElementById('new-crit-name').value='';
+  renderCritConfig();
+  renderCriteria();
+  updateSustTotal();
+  toast(`Criterio "${name}" agregado`);
+}
+
+function deleteCriterion(i) {
+  if(!confirm('¿Eliminar este criterio?')) return;
+  criteria.splice(i,1);
+  SS('criteria',criteria);
+  renderCritConfig();
+  renderCriteria();
+  updateSustTotal();
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 4 · GRUPOS
+// ══════════════════════════════════════════════════
+function createGroup() {
+  const name = document.getElementById('grp-name').value.trim();
+  if(!name){ toast('Escribe el nombre del grupo','#C62828'); return; }
+  const gid = 'g_'+Date.now();
+  groups[gid] = {id:gid, name, members:[]};
+  SS('groups',groups);
+  document.getElementById('grp-name').value='';
+  renderGroups();
+  toast(`Grupo "${name}" creado`);
+}
+
+function autoCreateGroups() {
+  const n = parseInt(prompt('¿Cuántos grupos?', '6'));
+  if(!n||n<1) return;
+  const shuffled = [...STUDENTS].sort(()=>Math.random()-.5);
+  const size = Math.ceil(shuffled.length/n);
+  for(let i=0;i<n;i++){
+    const gid='g_'+Date.now()+'_'+i;
+    const members = shuffled.slice(i*size,(i+1)*size).map(s=>s.id);
+    groups[gid]={id:gid, name:`Grupo ${i+1}`, members};
+  }
+  SS('groups',groups);
+  renderGroups();
+  toast(`${n} grupos creados automáticamente`);
+}
+
+function renderGroups() {
+  const grid = document.getElementById('groups-grid');
+  const assignRow = document.getElementById('grp-assign-row');
+  const grpKeys = Object.keys(groups);
+
+  if(!grpKeys.length){
+    grid.innerHTML='<p class="empty-state" style="grid-column:1/-1">No hay grupos creados.</p>';
+    assignRow.style.display='none';
+    return;
+  }
+
+  assignRow.style.display='flex';
+
+  // populate target select
+  const ts = document.getElementById('grp-target-sel');
+  ts.innerHTML = grpKeys.map(k=>`<option value="${k}">${groups[k].name}</option>`).join('');
+
+  // populate student select (unassigned first)
+  const assigned = new Set(grpKeys.flatMap(k=>groups[k].members));
+  const ss2 = document.getElementById('grp-student-sel');
+  const unassigned = STUDENTS.filter(s=>!assigned.has(s.id));
+  const inGroups   = STUDENTS.filter(s=>assigned.has(s.id));
+  ss2.innerHTML = '<optgroup label="Sin grupo">'+unassigned.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')+'</optgroup>'
+    +'<optgroup label="Ya en un grupo">'+inGroups.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')+'</optgroup>';
+
+  // render group cards
+  grid.innerHTML = grpKeys.map(gid=>{
+    const g = groups[gid];
+    const members = (g.members||[]).map(sid=>STUDENTS.find(s=>s.id===sid)).filter(Boolean);
+    return `<div class="group-card">
+      <div class="group-card-header">
+        <h3>${g.name} <span class="badge-count">${members.length}</span></h3>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-outline btn-xs" onclick="renameGroup('${gid}')">✏️</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteGroup('${gid}')">🗑</button>
+        </div>
+      </div>
+      <div class="group-card-body">
+        ${members.length ? members.map(s=>`
+          <div class="member-item">
+            <span>${s.name}</span>
+            <button class="btn btn-danger btn-xs" onclick="removeMember('${gid}','${s.id}')">✕</button>
+          </div>`).join('') : '<p class="empty-state" style="padding:10px 0">Sin integrantes</p>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  renderSustGroupSel();
+}
+
+function assignStudent() {
+  const gid = document.getElementById('grp-target-sel').value;
+  const sid = document.getElementById('grp-student-sel').value;
+  if(!gid||!sid) return;
+  // remove from other groups
+  Object.keys(groups).forEach(k=>{ groups[k].members=groups[k].members.filter(m=>m!==sid); });
+  groups[gid].members.push(sid);
+  SS('groups',groups);
+  renderGroups();
+}
+
+function removeMember(gid,sid) {
+  groups[gid].members = groups[gid].members.filter(m=>m!==sid);
+  SS('groups',groups); renderGroups();
+}
+
+function renameGroup(gid) {
+  const name = prompt('Nuevo nombre:', groups[gid].name);
+  if(name){ groups[gid].name=name; SS('groups',groups); renderGroups(); }
+}
+
+function deleteGroup(gid) {
+  if(!confirm(`¿Eliminar "${groups[gid].name}"?`)) return;
+  delete groups[gid]; delete sustRecords[gid];
+  SS('groups',groups); SS('sust_records',sustRecords);
+  renderGroups(); renderSustHistory();
+  toast('Grupo eliminado','#E65100');
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 5 · RESUMEN
+// ══════════════════════════════════════════════════
+function renderResumen() {
+  const q = (document.getElementById('search-student').value||'').toLowerCase();
+  const students = STUDENTS.filter(s=>s.name.toLowerCase().includes(q));
+
+  // stats
+  const allDates = Object.keys(attSessions);
+  const numSessions = allDates.length;
+  const avgAtt = numSessions ? Math.round(STUDENTS.reduce((s,st)=>{
+    const p = allDates.filter(d=>{
+      const r=(attSessions[d].records||{})[st.id];
+      return r&&(r.status==='P'||r.status==='T');
+    }).length;
+    return s + (numSessions?p/numSessions*100:0);
+  },0)/STUDENTS.length) : 0;
+
+  document.getElementById('resumen-stats').innerHTML = `
+    <div class="counter c-total"><div class="count">${STUDENTS.length}</div><div class="label">Estudiantes</div></div>
+    <div class="counter c-p"><div class="count">${numSessions}</div><div class="label">Sesiones</div></div>
+    <div class="counter c-total"><div class="count">${activities.length}</div><div class="label">Actividades</div></div>
+    <div class="counter c-p"><div class="count">${avgAtt}%</div><div class="label">Asistencia Prom.</div></div>`;
+
+  const list = document.getElementById('resumen-list');
+  if(!students.length){ list.innerHTML='<p class="empty-state">Sin resultados.</p>'; return; }
+
+  list.innerHTML = students.map((s,idx)=>{
+    // Attendance
+    const attPct = numSessions ? Math.round(allDates.filter(d=>{
+      const r=(attSessions[d].records||{})[s.id]; return r&&(r.status==='P'||r.status==='T');
+    }).length / numSessions * 100) : null;
+
+    // Grades avg
+    let wpSum=0, wSum=0;
+    activities.forEach(a=>{
+      const v=parseFloat((grades[a.id]||{})[s.id]);
+      if(!isNaN(v)){wpSum+=v*a.weight; wSum+=a.weight;}
+    });
+    const gradeAvg = wSum>0 ? (wpSum/wSum).toFixed(2) : null;
+
+    // Sustentacion
+    let sustScore = null;
+    const grpEntry = Object.values(groups).find(g=>g.members.includes(s.id));
+    const excluido = SUST_EXCLUIDOS.includes(s.id);
+    if(grpEntry && sustRecords[grpEntry.id] && !excluido) sustScore = sustRecords[grpEntry.id].total;
+
+    const pct = v => Math.min(100, Math.max(0, v));
+    const gradeToColor = v => v>=3.5?'prog-g':v>=3.0?'prog-y':'prog-r';
+    const attColor = v => v>=80?'prog-g':v>=60?'prog-y':'prog-r';
+    const sustColor = v => v>=17?'prog-g':v>=13?'prog-y':'prog-r';
+
+    const pendienteBadge = excluido
+      ? `<span class="grade-cell" style="background:#FFF3E0;color:#E65100">⏳ Sust. Pendiente</span>`
+      : '';
+
+    return `<div class="summary-student-row">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="sname">${idx+1}. ${s.name}</div>
+          <div class="smeta">ID: ${s.id} ${grpEntry?'· '+grpEntry.name:''}</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+          ${attPct!==null?`<span class="grade-cell ${attColor(attPct)}">${attPct}% Asist.</span>`:''}
+          ${gradeAvg!==null?`<span class="grade-cell ${gradeToColor(parseFloat(gradeAvg))}">${gradeAvg} Nota</span>`:''}
+          ${sustScore!==null?`<span class="grade-cell ${sustColor(sustScore)}">${sustScore}/20 Sust.</span>`:''}
+          ${pendienteBadge}
+        </div>
+      </div>
+      ${attPct!==null?`<div class="prog-row">
+        <span class="prog-label">Asistencia</span>
+        <div class="progress-wrap" style="flex:1"><div class="progress-bar ${attColor(attPct)}" style="width:${pct(attPct)}%"></div></div>
+        <span class="prog-val">${attPct}%</span>
+      </div>`:''}
+      ${gradeAvg!==null?`<div class="prog-row">
+        <span class="prog-label">Nota Prom.</span>
+        <div class="progress-wrap" style="flex:1"><div class="progress-bar ${gradeToColor(parseFloat(gradeAvg))}" style="width:${pct(parseFloat(gradeAvg)/5*100)}%"></div></div>
+        <span class="prog-val">${gradeAvg}</span>
+      </div>`:''}
+      ${sustScore!==null?`<div class="prog-row">
+        <span class="prog-label">Sustentación</span>
+        <div class="progress-wrap" style="flex:1"><div class="progress-bar ${sustColor(sustScore)}" style="width:${pct(sustScore/20*100)}%"></div></div>
+        <span class="prog-val">${sustScore}/20</span>
+      </div>`:''}
+      ${excluido?`<div style="font-size:11px;color:#E65100;margin-top:4px">⚠️ Sustentación pendiente — sin justificación entregada</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  EXPORTAR
+// ══════════════════════════════════════════════════
+function exportCSV() {
+  const allDates = Object.keys(attSessions).sort();
+  const headers = ['ID','Nombre',
+    ...allDates.map(d=>'Asist.'+d),
+    ...activities.map(a=>`${a.name}(${a.weight}%)`),
+    'Promedio Ponderado',
+    'Grupo','Sustentación/20'
+  ];
+  const rows = STUDENTS.map(s=>{
+    const attVals = allDates.map(d=>{ const r=(attSessions[d].records||{})[s.id]; return r?r.status:''; });
+    let wpSum=0,wSum=0;
+    const gradeVals = activities.map(a=>{ const v=parseFloat((grades[a.id]||{})[s.id]);
+      if(!isNaN(v)){wpSum+=v*a.weight;wSum+=a.weight;} return isNaN(v)?'':v; });
+    const avg = wSum>0?(wpSum/wSum).toFixed(2):'';
+    const grp = Object.values(groups).find(g=>g.members.includes(s.id));
+    const sust = grp&&sustRecords[grp.id]?sustRecords[grp.id].total:'';
+    return [s.id,s.name,...attVals,...gradeVals,avg,grp?grp.name:'',sust];
+  });
+  const csv = [headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  download('dashboard-comunicacion-digital.csv','text/csv',csv);
+  toast('📄 CSV exportado');
+}
+
+function exportJSON() {
+  const data = {
+    curso:'COMUNICACIÓN DIGITAL 360 MARKETING', grupo:'S1G1 2026-001',
+    exportDate: new Date().toISOString(),
+    students:STUDENTS, attSessions, activities, grades, groups, sustRecords
+  };
+  download('dashboard-comunicacion-digital.json','application/json',JSON.stringify(data,null,2));
+  toast('📋 JSON exportado');
+}
+
+function download(filename, mime, content) {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:mime}));
+  a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function clearAllData() {
+  if(!confirm('¿Limpiar TODOS los datos guardados? Esta acción es irreversible.')) return;
+  ['att_sessions','activities','grades','groups','sust_records'].forEach(k=>localStorage.removeItem('eandash_'+k));
+  attSessions={}; activities={}; grades={}; groups={}; sustRecords={};
+  location.reload();
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 6 · CONSOLIDADO ASISTENCIA
+// ══════════════════════════════════════════════════
+function renderConsolidadoAtt() {
+  const q       = (document.getElementById('catt-search').value||'').toLowerCase();
+  const filter  = document.getElementById('catt-filter').value;
+  const dates   = Object.keys(attSessions).sort();
+
+  // Build per-student stats
+  const stats = STUDENTS.map(s => {
+    let pres=0, fallas=0, tard=0;
+    const cells = dates.map(d => {
+      const r = (attSessions[d].records||{})[s.id];
+      if(!r) return null;
+      if(r.status==='P'){pres++;return 'P';}
+      if(r.status==='T'){tard++;pres++;return 'T';}
+      if(r.status==='A'){fallas++;return 'A';}
+      return null;
+    });
+    const total = pres + fallas;
+    const pct   = total>0 ? Math.round(pres/total*100) : 100;
+    const grp   = Object.values(groups).find(g=>g.members.includes(s.id));
+    return {s, pres, fallas, tard, pct, cells, grp};
+  });
+
+  // KPIs
+  const riesgo  = stats.filter(x=>x.fallas>=3).length;
+  const aten    = stats.filter(x=>x.fallas>=1&&x.fallas<3).length;
+  const ok      = stats.filter(x=>x.fallas===0).length;
+  const avgPct  = Math.round(stats.reduce((a,x)=>a+x.pct,0)/stats.length);
+  const totFallas = stats.reduce((a,x)=>a+x.fallas,0);
+  document.getElementById('catt-kpis').innerHTML = [
+    {lbl:'Sesiones registradas', val:dates.length,   color:'#1565C0'},
+    {lbl:'% Asistencia promedio',val:avgPct+'%',     color:'#2E7D32'},
+    {lbl:'Total fallas acum.',   val:totFallas,       color:'#424242'},
+    {lbl:'⚠️ En atención (1-2)', val:aten,            color:'#F57F17'},
+    {lbl:'🔴 En riesgo (3+)',    val:riesgo,          color:'#C62828'},
+    {lbl:'✅ Sin fallas',        val:ok,              color:'#2E7D32'},
+  ].map(k=>`<div style="background:white;border-radius:8px;padding:10px 14px;border-top:4px solid ${k.color};box-shadow:0 2px 6px rgba(0,0,0,.1);min-width:130px">
+    <div style="font-size:10px;text-transform:uppercase;color:#546E7A;font-weight:700">${k.lbl}</div>
+    <div style="font-size:24px;font-weight:900;color:${k.color};line-height:1.2">${k.val}</div>
+  </div>`).join('');
+
+  // Filter rows
+  let rows = stats.filter(({s, fallas}) => {
+    if(q && !s.name.toLowerCase().includes(q) && !s.id.includes(q)) return false;
+    if(filter==='ok'     && fallas!==0) return false;
+    if(filter==='aten'   && !(fallas>=1&&fallas<3)) return false;
+    if(filter==='riesgo' && fallas<3) return false;
+    return true;
+  });
+
+  document.getElementById('catt-count').textContent = `Mostrando ${rows.length} de ${STUDENTS.length} estudiantes`;
+
+  if(!dates.length){
+    document.getElementById('catt-table').innerHTML='<p class="empty-state">No hay sesiones registradas aún. Guarda la primera sesión en la pestaña Asistencia.</p>';
+    return;
+  }
+
+  // Table
+  let html = `<table><thead>
+    <tr>
+      <th>#</th><th>Estudiante</th><th>Grupo</th>
+      ${dates.map((d,i)=>{const s=attSessions[d]; return `<th class="num" title="${s.topic||''}" style="font-size:10px;cursor:help">${s.week||'S'+(i+1)}<br><span style="font-weight:400;opacity:.85">${d.slice(5)}</span></th>`; }).join('')}
+      <th class="num">✅ Pres.</th>
+      <th class="num">❌ Fallas</th>
+      <th class="num">% Asist.</th>
+      <th class="num">Estado</th>
+    </tr></thead><tbody>`;
+
+  rows.forEach(({s, pres, fallas, tard, pct, cells, grp}, idx)=>{
+    const estadoCls = fallas>=3?'#FFEBEE;color:#C62828':fallas>=1?'#FFF3E0;color:#E65100':'#E8F5E9;color:#1B5E20';
+    const estadoTxt = fallas>=3?'🔴 Riesgo':fallas>=1?'⚠️ Atención':'✅ En regla';
+    const fallaStyle= fallas>=3?'color:#C62828;font-weight:900':fallas>=1?'color:#E65100;font-weight:800':'color:#2E7D32;font-weight:700';
+    const sessCells = cells.map(c=>{
+      if(c==='P') return `<td class="num"><span style="background:#C8E6C9;color:#1B5E20;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">P</span></td>`;
+      if(c==='A') return `<td class="num"><span style="background:#FFCDD2;color:#B71C1C;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">A</span></td>`;
+      if(c==='T') return `<td class="num"><span style="background:#FFF9C4;color:#E65100;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:700">T</span></td>`;
+      return `<td class="num" style="color:#CFD8DC;font-size:10px">—</td>`;
+    }).join('');
+    const barW  = Math.max(pct,0);
+    const barClr= pct<70?'#C62828':pct<85?'#F57F17':'#2E7D32';
+    html+=`<tr>
+      <td class="num" style="color:#90A4AE;font-size:11px">${idx+1}</td>
+      <td><b style="font-size:12px">${s.name}</b><br><span style="font-size:10px;color:#90A4AE">CC ${s.id}</span></td>
+      <td><span style="background:var(--ean-pale);color:var(--ean-dark);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${grp?grp.name:'Sin grupo'}</span></td>
+      ${sessCells}
+      <td class="num" style="font-weight:700;color:#2E7D32">${pres}</td>
+      <td class="num" style="${fallaStyle}">${fallas}</td>
+      <td class="num">
+        <div style="background:#E0E0E0;border-radius:4px;height:6px;width:60px;display:inline-block;vertical-align:middle">
+          <div style="height:100%;border-radius:4px;background:${barClr};width:${barW}%"></div>
+        </div>
+        <span style="font-size:11px;margin-left:4px">${pct}%</span>
+      </td>
+      <td class="num"><span style="background:${estadoCls};padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700">${estadoTxt}</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('catt-table').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 7 · CONSOLIDADO NOTAS
+// ══════════════════════════════════════════════════
+function renderConsolidadoNotas() {
+  const q      = (document.getElementById('cnotas-search').value||'').toLowerCase();
+  const filter = document.getElementById('cnotas-filter').value;
+
+  // Build per-student grade data
+  const data = STUDENTS.map(s => {
+    let wpSum=0, wSum=0;
+    const actGrades = activities.map(a => {
+      const v = parseFloat((grades[a.id]||{})[s.id]);
+      if(!isNaN(v)){wpSum+=v*a.weight; wSum+=a.weight;}
+      return isNaN(v) ? null : v;
+    });
+    const avg = wSum>0 ? (wpSum/wSum) : null;
+
+    // Sust
+    const excluido = SUST_EXCLUIDOS.includes(s.id);
+    const grp      = Object.values(groups).find(g=>g.members.includes(s.id));
+    let sust = null;
+    if(!excluido && grp && sustRecords[grp.id]) sust = sustRecords[grp.id].total;
+    const sustPending = excluido;
+
+    // Attendance %
+    const dates = Object.keys(attSessions).sort();
+    const pres  = dates.filter(d=>{ const r=(attSessions[d].records||{})[s.id]; return r&&(r.status==='P'||r.status==='T'); }).length;
+    const attPct= dates.length>0 ? Math.round(pres/dates.length*100) : null;
+
+    return {s, actGrades, avg, sust, sustPending, grp, attPct};
+  });
+
+  // KPIs
+  const withAvg   = data.filter(x=>x.avg!==null);
+  const avgGeneral= withAvg.length>0 ? (withAvg.reduce((a,x)=>a+x.avg,0)/withAvg.length).toFixed(2) : '—';
+  const aprobados = withAvg.filter(x=>x.avg>=3.0).length;
+  const riesgoN   = withAvg.filter(x=>x.avg<3.0).length;
+  const sinNota   = data.filter(x=>x.avg===null).length;
+  document.getElementById('cnotas-kpis').innerHTML = [
+    {lbl:'Promedio general', val:avgGeneral, color:'#2E7D32'},
+    {lbl:'Actividades',      val:activities.length, color:'#1565C0'},
+    {lbl:'✅ Aprobados',     val:aprobados,  color:'#2E7D32'},
+    {lbl:'🔴 En riesgo',     val:riesgoN,   color:'#C62828'},
+    {lbl:'⬜ Sin nota aún',  val:sinNota,   color:'#546E7A'},
+  ].map(k=>`<div style="background:white;border-radius:8px;padding:10px 14px;border-top:4px solid ${k.color};box-shadow:0 2px 6px rgba(0,0,0,.1);min-width:130px">
+    <div style="font-size:10px;text-transform:uppercase;color:#546E7A;font-weight:700">${k.lbl}</div>
+    <div style="font-size:24px;font-weight:900;color:${k.color};line-height:1.2">${k.val}</div>
+  </div>`).join('');
+
+  // Filter
+  let rows = data.filter(({s, avg}) => {
+    if(q && !s.name.toLowerCase().includes(q) && !s.id.includes(q)) return false;
+    if(filter==='alto'  && !(avg!==null&&avg>=4.0)) return false;
+    if(filter==='ok'    && !(avg!==null&&avg>=3.0&&avg<4.0)) return false;
+    if(filter==='riesgo'&& !(avg!==null&&avg<3.0)) return false;
+    if(filter==='sin'   && avg!==null) return false;
+    return true;
+  });
+
+  document.getElementById('cnotas-count').textContent = `Mostrando ${rows.length} de ${STUDENTS.length} estudiantes`;
+
+  // Table
+  const hasActs = activities.length>0;
+  let html = `<table><thead><tr>
+    <th>#</th><th>Estudiante</th><th>Grupo</th>
+    ${hasActs ? activities.map(a=>`<th class="num" style="font-size:10px">${a.name}<br><small style="font-weight:400">${a.weight}%</small></th>`).join('') : ''}
+    ${hasActs ? '<th class="num">Prom. Pond.</th>' : ''}
+    <th class="num">Sustentación</th>
+    <th class="num">Asistencia</th>
+    <th class="num">Estado</th>
+  </tr></thead><tbody>`;
+
+  rows.forEach(({s, actGrades, avg, sust, sustPending, grp, attPct}, idx)=>{
+    // Grade color
+    const gClr = avg===null?'':avg>=4.0?'background:#E8F5E9;color:#1B5E20':avg>=3.0?'background:#E3F2FD;color:#1565C0':'background:#FFEBEE;color:#C62828';
+    const gTxt = avg===null?'—':avg.toFixed(2);
+
+    // Sust
+    let sustHTML;
+    if(sustPending){
+      sustHTML=`<span style="background:#FFF9C4;color:#F57F17;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">⏳ Pendiente</span>`;
+    } else if(sust!==null){
+      const sc = sust>=17?'background:#E8F5E9;color:#1B5E20':sust>=13?'background:#E3F2FD;color:#1565C0':sust>=9?'background:#FFF3E0;color:#E65100':'background:#FFEBEE;color:#C62828';
+      const sl = sust>=17?'Excelente':sust>=13?'Bueno':sust>=9?'Regular':'Insuficiente';
+      sustHTML=`<span style="${sc};padding:2px 8px;border-radius:5px;font-size:11px;font-weight:700">${sust}/20 ${sl}</span>`;
+    } else {
+      sustHTML=`<span style="color:#CFD8DC;font-size:11px">—</span>`;
+    }
+
+    // Att
+    const attHTML = attPct!==null
+      ? `<span style="${attPct>=80?'color:#2E7D32':attPct>=60?'color:#E65100':'color:#C62828'};font-weight:700">${attPct}%</span>`
+      : `<span style="color:#CFD8DC">—</span>`;
+
+    // Estado general
+    let estado='';
+    if(avg!==null){
+      if(avg>=4.0)       estado=`<span style="background:#E8F5E9;color:#1B5E20;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700">🟢 Alto</span>`;
+      else if(avg>=3.0)  estado=`<span style="background:#E3F2FD;color:#1565C0;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700">✅ Aprobado</span>`;
+      else               estado=`<span style="background:#FFEBEE;color:#C62828;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700">🔴 Riesgo</span>`;
+    } else {
+      estado=`<span style="background:#ECEFF1;color:#546E7A;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700">⬜ Sin nota</span>`;
+    }
+
+    const actCells = hasActs ? actGrades.map(v=>
+      v===null ? `<td class="num" style="color:#CFD8DC">—</td>`
+               : `<td class="num" style="${v>=3.5?'color:#1B5E20':v>=3.0?'color:#1565C0':'color:#C62828'};font-weight:700">${v.toFixed(1)}</td>`
+    ).join('') : '';
+
+    html+=`<tr>
+      <td class="num" style="color:#90A4AE;font-size:11px">${idx+1}</td>
+      <td><b style="font-size:12px">${s.name}</b><br><span style="font-size:10px;color:#90A4AE">CC ${s.id}</span></td>
+      <td><span style="background:var(--ean-pale);color:var(--ean-dark);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">${grp?grp.name:'Sin grupo'}</span></td>
+      ${actCells}
+      ${hasActs ? `<td class="num"><span style="${gClr};padding:3px 8px;border-radius:5px;font-size:12px;font-weight:800">${gTxt}</span></td>` : ''}
+      <td class="num">${sustHTML}</td>
+      <td class="num">${attHTML}</td>
+      <td class="num">${estado}</td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('cnotas-table').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+function init() {
+  initAttDate();
+  buildAttTable();
+  renderSessionList();
+  renderGradesTable();
+  renderCriteria();
+  updateSustTotal();
+}
+
+init();
+</script>
+</body>
+</html>
