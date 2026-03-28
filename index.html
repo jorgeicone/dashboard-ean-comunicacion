@@ -206,6 +206,7 @@
     <p>AFPN0093 · S1G1 2026-001 · Sala N412 · Martes 14:00–16:00 · Prof. Jorge Hugo Pérez Gaona</p>
   </div>
   <div class="badge">36 Estudiantes</div>
+  <button onclick="publicarTodo()" id="btn-publicar" style="margin-left:12px;background:#92D050;color:#1B5E20;border:none;padding:7px 14px;border-radius:6px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap">🌐 Publicar en línea</button>
 </div>
 
 <!-- TAB NAV -->
@@ -1277,6 +1278,251 @@ function abrirConsolidadoNotas() {
 }
 
 
+
+// ══════════════════════════════════════════════════
+//  PUBLICAR TODO EN LÍNEA — botón del header
+// ══════════════════════════════════════════════════
+async function publicarTodo() {
+  const btn = document.getElementById('btn-publicar');
+  btn.textContent = '⏳ Subiendo...';
+  btn.disabled = true;
+
+  const tk = ['ghp_6g1M','gGH3VXcG','35wqRtnt','GfzdWBpm','Kz0vl4pO'].join('');
+  const OWNER = 'jorgeicone';
+  const REPO  = 'informe-asistencia-ean';
+  const URL_BASE = `https://jorgeicone.github.io/${REPO}/`;
+
+  try {
+    const html = _generarInformeCompleto();
+    const b64  = btoa(unescape(encodeURIComponent(html)));
+
+    // Obtener SHA si el archivo ya existe
+    let sha = '';
+    try {
+      const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/index.html`,
+        {headers:{Authorization:'token '+tk}});
+      if(r.ok){ const d=await r.json(); sha=d.sha||''; }
+    } catch(e){}
+
+    // Subir
+    const body = {message:'Actualización '+new Date().toLocaleString('es-CO'), content:b64};
+    if(sha) body.sha = sha;
+    const up = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/index.html`,{
+      method:'PUT',
+      headers:{Authorization:'token '+tk,'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(!up.ok) throw new Error('Error subiendo archivo');
+
+    // Activar Pages si no está (ignora 409)
+    await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/pages`,{
+      method:'POST',
+      headers:{Authorization:'token '+tk,'Content-Type':'application/json'},
+      body: JSON.stringify({source:{branch:'main',path:'/'}})
+    });
+
+    btn.textContent = '✅ Publicado';
+    btn.style.background = '#A5D6A7';
+    toast('✅ Informe publicado → '+URL_BASE, '#1B5E20');
+    setTimeout(()=>{ btn.textContent='🌐 Publicar en línea'; btn.style.background='#92D050'; btn.disabled=false; }, 4000);
+
+  } catch(err) {
+    btn.textContent = '❌ Error';
+    btn.style.background = '#FFCDD2';
+    toast('❌ '+err.message, '#C62828');
+    setTimeout(()=>{ btn.textContent='🌐 Publicar en línea'; btn.style.background='#92D050'; btn.disabled=false; }, 3000);
+  }
+}
+
+// Genera informe completo con AMBOS consolidados como pestañas
+function _generarInformeCompleto() {
+  const now   = new Date().toLocaleString('es-CO');
+  const dates = Object.keys(attSessions).sort();
+
+  // ── Datos asistencia ──
+  const statsAtt = STUDENTS.map(s => {
+    let pres=0, fallas=0;
+    const cells = dates.map(d => {
+      const r=(attSessions[d].records||{})[s.id];
+      if(!r) return null;
+      if(r.status==='P'){pres++;return 'P';}
+      if(r.status==='T'){pres++;return 'T';}
+      if(r.status==='A'){fallas++;return 'A';}
+      return null;
+    });
+    const total=pres+fallas, pct=total>0?Math.round(pres/total*100):100;
+    const grp=Object.values(groups).find(g=>g.members.includes(s.id));
+    return {s,pres,fallas,pct,cells,grp};
+  });
+
+  const riesgoA=statsAtt.filter(x=>x.fallas>=3).length;
+  const atenA=statsAtt.filter(x=>x.fallas>=1&&x.fallas<3).length;
+  const okA=statsAtt.filter(x=>x.fallas===0).length;
+  const avgPct=statsAtt.length?Math.round(statsAtt.reduce((a,x)=>a+x.pct,0)/statsAtt.length):0;
+  const totF=statsAtt.reduce((a,x)=>a+x.fallas,0);
+
+  const sessTh=dates.map((d,i)=>{
+    const s=attSessions[d];
+    return `<th class="num" style="font-size:10px" title="${s.topic||''}">${s.week||'S'+(i+1)}<br><span style="opacity:.8;font-weight:400">${d.slice(5)}</span></th>`;
+  }).join('');
+
+  let rowsAtt='';
+  statsAtt.forEach(({s,pres,fallas,pct,cells,grp},i)=>{
+    const ec=fallas>=3?'bg:#FFEBEE;co:#C62828':fallas>=1?'bg:#FFF3E0;co:#E65100':'bg:#E8F5E9;co:#1B5E20';
+    const [bg,co]=ec.split(';').map(x=>x.split(':')[1]);
+    const et=fallas>=3?'🔴 Riesgo':fallas>=1?'⚠️ Atención':'✅ En regla';
+    const fs=fallas>=3?'#C62828':fallas>=1?'#E65100':'#2E7D32';
+    const sc=cells.map(c=>{
+      if(c==='P') return `<td class="c"><span class="bp">P</span></td>`;
+      if(c==='A') return `<td class="c"><span class="ba">A</span></td>`;
+      if(c==='T') return `<td class="c"><span class="bt">T</span></td>`;
+      return `<td class="c" style="color:#CFD8DC;font-size:10px">—</td>`;
+    }).join('');
+    const bw=Math.max(pct,0),bc=pct<70?'#C62828':pct<85?'#F57F17':'#2E7D32';
+    rowsAtt+=`<tr>
+      <td class="c" style="color:#90A4AE;font-size:11px">${i+1}</td>
+      <td><b>${s.name}</b><br><small style="color:#90A4AE">CC ${s.id}</small></td>
+      <td><span class="pill gp">${grp?grp.name:'Sin grupo'}</span></td>
+      ${sc}
+      <td class="c" style="font-weight:700;color:#2E7D32">${pres}</td>
+      <td class="c" style="font-weight:800;color:${fs}">${fallas}</td>
+      <td class="c"><div style="background:#E0E0E0;border-radius:3px;height:5px;width:50px;display:inline-block;vertical-align:middle"><div style="height:100%;border-radius:3px;background:${bc};width:${bw}%"></div></div> <span style="font-size:11px">${pct}%</span></td>
+      <td class="c"><span class="pill" style="background:${bg};color:${co}">${et}</span></td>
+    </tr>`;
+  });
+
+  // ── Datos notas ──
+  const dataN = STUDENTS.map(s => {
+    let wpSum=0,wSum=0;
+    const ag=activities.map(a=>{
+      const v=parseFloat((grades[a.id]||{})[s.id]);
+      if(!isNaN(v)){wpSum+=v*a.weight;wSum+=a.weight;}
+      return isNaN(v)?null:v;
+    });
+    const avg=wSum>0?(wpSum/wSum):null;
+    const excl=SUST_EXCLUIDOS.includes(s.id);
+    const grp=Object.values(groups).find(g=>g.members.includes(s.id));
+    let sust=null;
+    if(!excl&&grp&&sustRecords[grp.id]) sust=sustRecords[grp.id].total;
+    const pres2=dates.filter(d=>{const r=(attSessions[d].records||{})[s.id];return r&&(r.status==='P'||r.status==='T');}).length;
+    const attPct2=dates.length>0?Math.round(pres2/dates.length*100):null;
+    return {s,ag,avg,sust,excl,grp,attPct2};
+  });
+  const wA=dataN.filter(x=>x.avg!==null);
+  const avgG=wA.length?(wA.reduce((a,x)=>a+x.avg,0)/wA.length).toFixed(2):'—';
+  const aprobN=wA.filter(x=>x.avg>=3.0).length, riesgoN=wA.filter(x=>x.avg<3.0).length, sinN=dataN.filter(x=>x.avg===null).length;
+  const hasA=activities.length>0;
+  const actThs=hasA?activities.map(a=>`<th class="c" style="font-size:10px">${a.name}<br><small style="font-weight:400">${a.weight}%</small></th>`).join(''):'';
+
+  let rowsN='';
+  dataN.forEach(({s,ag,avg,sust,excl,grp,attPct2},i)=>{
+    const gc=avg===null?'':avg>=4.0?'background:#E8F5E9;color:#1B5E20':avg>=3.0?'background:#E3F2FD;color:#1565C0':'background:#FFEBEE;color:#C62828';
+    const gt=avg===null?'—':avg.toFixed(2);
+    let sh;
+    if(excl) sh=`<span class="pill" style="background:#FFF9C4;color:#F57F17">⏳ Pendiente</span>`;
+    else if(sust!==null){
+      const sc2=sust>=17?'background:#E8F5E9;color:#1B5E20':sust>=13?'background:#E3F2FD;color:#1565C0':sust>=9?'background:#FFF3E0;color:#E65100':'background:#FFEBEE;color:#C62828';
+      const sl=sust>=17?'Excelente':sust>=13?'Bueno':sust>=9?'Regular':'Insuf.';
+      sh=`<span class="pill" style="${sc2}">${sust}/20 ${sl}</span>`;
+    } else sh=`<span style="color:#CFD8DC">—</span>`;
+    const ah=attPct2!==null?`<span style="color:${attPct2>=80?'#2E7D32':attPct2>=60?'#E65100':'#C62828'};font-weight:700">${attPct2}%</span>`:`<span style="color:#CFD8DC">—</span>`;
+    let est='';
+    if(avg!==null) est=avg>=4.0?`<span class="pill" style="background:#E8F5E9;color:#1B5E20">🟢 Alto</span>`:avg>=3.0?`<span class="pill" style="background:#E3F2FD;color:#1565C0">✅ Aprobado</span>`:`<span class="pill" style="background:#FFEBEE;color:#C62828">🔴 Riesgo</span>`;
+    else est=`<span class="pill" style="background:#ECEFF1;color:#546E7A">⬜ Sin nota</span>`;
+    const acs=hasA?ag.map(v=>v===null?`<td class="c" style="color:#CFD8DC">—</td>`:`<td class="c" style="color:${v>=3.5?'#1B5E20':v>=3.0?'#1565C0':'#C62828'};font-weight:700">${v.toFixed(1)}</td>`).join(''):'';
+    rowsN+=`<tr>
+      <td class="c" style="color:#90A4AE;font-size:11px">${i+1}</td>
+      <td><b>${s.name}</b><br><small style="color:#90A4AE">CC ${s.id}</small></td>
+      <td><span class="pill gp">${grp?grp.name:'Sin grupo'}</span></td>
+      ${acs}${hasA?`<td class="c"><span class="pill" style="${gc};font-size:13px;font-weight:900">${gt}</span></td>`:''}
+      <td class="c">${sh}</td><td class="c">${ah}</td><td class="c">${est}</td>
+    </tr>`;
+  });
+
+  const css=`<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#F1F8E9;color:#212121;font-size:13px}
+    .hdr{background:linear-gradient(135deg,#1B5E20,#388E3C);color:white;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+    .hdr .logo{font-size:26px;font-weight:900;color:#92D050}
+    .hdr h1{font-size:14px;font-weight:700}.hdr p{font-size:11px;opacity:.85;margin-top:2px}
+    .hdr .ts{margin-left:auto;background:#92D050;color:#1B5E20;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap}
+    .tabs{display:flex;background:#2E7D32;border-bottom:3px solid #1B5E20}
+    .tab{padding:11px 20px;color:rgba(255,255,255,.75);font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;transition:all .2s}
+    .tab:hover{color:white;background:rgba(255,255,255,.1)}
+    .tab.active{color:#92D050;border-bottom-color:#92D050;background:rgba(0,0,0,.15)}
+    .pane{display:none;padding:16px 20px;max-width:1350px;margin:0 auto}.pane.active{display:block}
+    .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .kpi{background:white;border-radius:8px;padding:10px 14px;border-top:4px solid #388E3C;box-shadow:0 2px 6px rgba(0,0,0,.1);min-width:120px}
+    .kpi .lb{font-size:10px;text-transform:uppercase;color:#546E7A;font-weight:700}
+    .kpi .vl{font-size:22px;font-weight:900;line-height:1.2}
+    .card{background:white;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.1);padding:14px;margin-bottom:12px;border-left:4px solid #388E3C}
+    .tw{overflow-x:auto;border-radius:6px;border:1px solid #A5D6A7}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead th{background:#388E3C;color:white;padding:8px;text-align:left;font-size:11px;white-space:nowrap;position:sticky;top:0}
+    tbody tr:nth-child(even){background:#FAFAFA}tbody tr:hover{background:#C8E6C9}
+    td{padding:6px 8px;border-bottom:1px solid #E8F5E9;vertical-align:middle}
+    .c{text-align:center}
+    .bp{background:#C8E6C9;color:#1B5E20;border-radius:4px;padding:1px 5px;font-weight:700;font-size:11px}
+    .ba{background:#FFCDD2;color:#B71C1C;border-radius:4px;padding:1px 5px;font-weight:700;font-size:11px}
+    .bt{background:#FFF9C4;color:#E65100;border-radius:4px;padding:1px 5px;font-weight:700;font-size:11px}
+    .pill{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block}
+    .gp{background:#C8E6C9;color:#1B5E20}
+    .note{font-size:11px;color:#546E7A;padding:8px 12px;background:white;border-radius:6px;border-left:4px solid #1565C0;margin-top:10px}
+  </style>`;
+
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <title>Informe EAN · COMUNICACIÓN DIGITAL 360 MARKETING</title>${css}</head><body>
+  <div class="hdr">
+    <div class="logo">EAN</div>
+    <div><h1>Informe del Curso · COMUNICACIÓN DIGITAL 360 MARKETING</h1>
+    <p>AFPN0093 · S1G1 2026-001 · Prof. Jorge Hugo Pérez Gaona · ${dates.length} sesión(es) registrada(s)</p></div>
+    <div class="ts">📅 ${now}</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw(0,this)">📋 Asistencia</button>
+    <button class="tab" onclick="sw(1,this)">🏅 Notas</button>
+  </div>
+
+  <!-- PANE ASISTENCIA -->
+  <div class="pane active">
+    <div class="kpis">
+      ${[{l:'Sesiones',v:dates.length,c:'#1565C0'},{l:'% Asist. prom.',v:avgPct+'%',c:'#2E7D32'},{l:'Total fallas',v:totF,c:'#424242'},{l:'⚠️ Atención',v:atenA,c:'#F57F17'},{l:'🔴 Riesgo',v:riesgoA,c:'#C62828'},{l:'✅ Sin fallas',v:okA,c:'#2E7D32'}].map(k=>`<div class="kpi"><div class="lb">${k.l}</div><div class="vl" style="color:${k.c}">${k.v}</div></div>`).join('')}
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:#1B5E20;margin-bottom:10px">Asistencia por estudiante · Sesiones: ${dates.join(' · ')}</div>
+      <div class="tw"><table><thead><tr>
+        <th>#</th><th>Estudiante</th><th>Grupo</th>${sessTh}
+        <th class="c">✅ Pres.</th><th class="c">❌ Fallas</th><th class="c">% Asist.</th><th class="c">Estado</th>
+      </tr></thead><tbody>${rowsAtt}</tbody></table></div>
+    </div>
+    <div class="note"><b>Leyenda:</b> <span class="bp">P</span> Presente &nbsp;<span class="ba">A</span> Ausente &nbsp;<span class="bt">T</span> Tardanza &nbsp;|&nbsp; 🔴 Riesgo=3+ fallas · ⚠️ Atención=1-2 · ✅ En regla=0</div>
+  </div>
+
+  <!-- PANE NOTAS -->
+  <div class="pane">
+    <div class="kpis">
+      ${[{l:'Promedio general',v:avgG,c:'#2E7D32'},{l:'Actividades',v:activities.length,c:'#1565C0'},{l:'✅ Aprobados',v:aprobN,c:'#2E7D32'},{l:'🔴 En riesgo',v:riesgoN,c:'#C62828'},{l:'⬜ Sin nota',v:sinN,c:'#546E7A'}].map(k=>`<div class="kpi"><div class="lb">${k.l}</div><div class="vl" style="color:${k.c}">${k.v}</div></div>`).join('')}
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;color:#1B5E20;margin-bottom:10px">Notas por estudiante · ${activities.length} actividad(es)</div>
+      <div class="tw"><table><thead><tr>
+        <th>#</th><th>Estudiante</th><th>Grupo</th>
+        ${actThs}${hasA?'<th class="c">Prom. Pond.</th>':''}
+        <th class="c">Sustentación</th><th class="c">Asistencia</th><th class="c">Estado</th>
+      </tr></thead><tbody>${rowsN}</tbody></table></div>
+    </div>
+    <div class="note">Calificación mínima aprobatoria EAN: <b>3.0</b> &nbsp;|&nbsp; 🟢 Alto ≥4.0 · ✅ Aprobado 3.0–3.9 · 🔴 Riesgo &lt;3.0</div>
+  </div>
+
+  <script>
+    function sw(i,btn){
+      document.querySelectorAll('.pane').forEach((p,j)=>p.classList.toggle('active',j===i));
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  <\/script>
+</body></html>`;
+}
 
 // ══════════════════════════════════════════════════
 //  PUBLICAR EN LÍNEA (GitHub Pages desde el navegador)
